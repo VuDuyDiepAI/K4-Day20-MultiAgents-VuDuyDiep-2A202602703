@@ -42,16 +42,22 @@ Sau lần lỗi, runner dùng stream_mode=values để giữ trạng thái cuố
 
 Chưa tạo tag freeze; chưa chạy hoặc phân tích task eval. Không có skill giả hoặc điểm tự tạo.
 
-## Tiếp tục khi quota/API sẵn sàng
+## Cấu hình Ollama local hiện tại
+
+Đã chuyển `.env` sang `ollama:qwen3-lab:8b`, temperature=0.6. Ollama 0.35.1 chạy trên Windows; model Qwen3 8B tải thành công và alias được tạo từ `Modelfile.lab` (context 16384, num_predict 4096). Docker gọi model qua `http://host.docker.internal:11434`; `Run-Lab.ps1` đặt biến này cho từng lệnh. Smoke test trả về `OK`; đủ 29 test đạt sau khi cài langchain-ollama 1.1.0 và ollama SDK 0.6.3. GPU/CPU ghi nhận 80%/20% với bộ nhớ model 7.8 GB. Chi tiết tái lập: `LOCAL_MODEL.md`.
+
+Baseline `data-learn` bằng model local đã được khởi chạy. Chỉ khi có run.json mới có thể ghi nhận điểm, lỗi, token và khả năng gọi công cụ. Các thống kê Gemini ở trên là lịch sử hạ tầng, không phải kết quả của cấu hình local.
+
+## Tiếp tục với runtime hiện tại
 
 Container lab-workflow-linux giữ runtime Linux; nếu đã dừng, dùng docker start lab-workflow-linux.
 Container đọc .env từ repo khi mỗi tiến trình Python khởi động, không cần đưa key vào câu lệnh.
 Từ PowerShell tại thư mục gốc, chạy tuần tự và kiểm tra error=null:
 
 ```powershell
-docker exec lab-workflow-linux python -m lab.runner --condition baseline --tasks data-learn --recursion-limit 60
-docker exec lab-workflow-linux python -m lab.runner --condition baseline --tasks code-learn logs-learn --recursion-limit 60
-docker exec lab-workflow-linux python -m lab.runner --condition subagents --tasks learn --recursion-limit 60
+.\Run-Lab.ps1 -m lab.runner --condition baseline --tasks data-learn --recursion-limit 60
+.\Run-Lab.ps1 -m lab.runner --condition baseline --tasks code-learn logs-learn --recursion-limit 60
+.\Run-Lab.ps1 -m lab.runner --condition subagents --tasks learn --recursion-limit 60
 ```
 
 Nếu quota tiếp tục lỗi, không chạy tiếp các lệnh. Một task có nhiều request; 20 request/ngày có thể không đủ cho một task, càng không đủ toàn bộ lab trong một buổi.
@@ -59,8 +65,8 @@ Nếu đổi model/provider, ghi cấu hình mới và dùng nhất quán cho to
 Khi sáu kết quả học hợp lệ đã có, phân tích mục 4/5 rồi mới chạy:
 
 ```powershell
-docker exec lab-workflow-linux python -m lab.curator
-docker exec lab-workflow-linux python -m lab.runner --condition skills-auto --tasks learn --recursion-limit 60
+.\Run-Lab.ps1 -m lab.curator
+.\Run-Lab.ps1 -m lab.runner --condition skills-auto --tasks learn --recursion-limit 60
 ```
 
 Đọc và đánh giá skill, sao lưu results/skills-auto thành results/skills-auto-dev; viết H1–H3 và freeze theo WORKFLOW.md trước bất kỳ lệnh eval nào.

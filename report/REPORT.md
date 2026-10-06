@@ -8,7 +8,7 @@
 |---|---|---|
 | Vu Duy Diep | 2A202602703 | Triển khai và kiểm tra harness, chạy thí nghiệm, phân tích và viết báo cáo với hỗ trợ Codex. Thông tin tên/MSSV lấy từ tên kho bài lab. |
 
-- Mô hình: `google_genai:gemini-3.5-flash`; `LAB_TEMPERATURE=1`; `recursion_limit=60`, dùng nhất quán cho ba điều kiện.
+- Mô hình hiện tại: `ollama:qwen3-lab:8b` (Qwen3 8B local); `LAB_TEMPERATURE=0.6`; `recursion_limit=60`, dùng nhất quán cho ba điều kiện. Context 16384, num_predict 4096, top_p 0.95, top_k 20 theo `Modelfile.lab`.
 - Deep Agents 0.7.21, langchain-google-genai 4.4.0; Python 3.11.16 trên Linux trong container Docker riêng `lab-workflow-linux`. Phiên bản thư viện đầy đủ: `report/environment-linux.txt`. Cài dependency offline bằng wheel Linux sau lỗi tải mạng. Toàn bộ 29 test đạt trên Linux trước khi chạy task thật.
 - Số lần chạy: ba baseline data-learn lỗi hạ tầng (429, 503, 429), lưu riêng trong results-infrastructure, không tính là kết quả hợp lệ; chưa có run chính thức hợp lệ. Tổng token ghi nhận của các lần lỗi: 198.547; thời gian: 438,1 giây. Chi tiết: report/STATUS.md.
 - Commit của tag `freeze`: chưa tạo; chờ dữ liệu học hợp lệ và giả thuyết.
@@ -76,7 +76,7 @@ Nhận xét: nhóm lỗi nào chiếm đa số? Skill có thể phòng ngừa nh
 > Nêu ít nhất 3 hạn chế và ảnh hưởng của từng hạn chế đến kết luận (ví dụ: chỉ 3 tác vụ mỗi vai trò, mỗi cấu hình chạy một lần, nhiễu của mô hình, tác vụ do giảng viên thiết kế sẵn quy ước, chỉ một mô hình).
 
 1. Chỉ có ba tác vụ cho mỗi vai trò learn/eval và cùng ba họ do giảng viên thiết kế; kết quả không đại diện cho mọi tác vụ agent thực tế.
-2. Mỗi cấu hình chính thức chỉ chạy một lần và model có temperature=1; chênh lệch điểm có thể do nhiễu. So hai lần skills-auto trên tập học chỉ ước lượng nhiễu trên tập học, không tạo khoảng tin cậy cho tập đánh giá.
+2. Mỗi cấu hình chính thức chỉ chạy một lần và model có temperature=0.6; chênh lệch điểm có thể do nhiễu. So hai lần skills-auto trên tập học chỉ ước lượng nhiễu trên tập học, không tạo khoảng tin cậy cho tập đánh giá.
 3. Chỉ dùng một model và một harness; kết luận không thể tự động chuyển sang provider hoặc kiến trúc khác. Token tính cả subagent nhưng trace/tool_calls chỉ thuộc luồng chính, hạn chế phân tích thao tác nội bộ subagent.
 4. Lỗi quota và quá tải API có thể làm task dừng trước khi hoàn tất. Các lần có lỗi hạ tầng được lưu riêng và không dùng làm bằng chứng agent kém hoặc feedback cho curator; ngân sách tổng vẫn cần tính cả chúng.
 

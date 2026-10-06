@@ -2,7 +2,7 @@
 
 Nguồn: README.md, GUIDE.md, RUBRIC.md, REPORT_TEMPLATE.md và guides/pseudocode/01–05.
 Đây là kế hoạch thực hiện; các checkpoint chưa được đánh dấu hoàn thành.
-Kết nối Gemini đã thành công theo log của người dùng; các hàm TODO vẫn cần triển khai.
+Các hàm TODO đã triển khai và kiểm tra trên Linux. Cấu hình hiện tại dùng Ollama local; các lần Gemini lỗi quota được lưu riêng, không trộn vào kết quả thí nghiệm.
 
 ## 1. Luồng thực hiện và nguyên tắc
 
@@ -22,7 +22,7 @@ flowchart TD
 
 - Chỉ triển khai TODO trong `subagents.py`, `agent.py`, `runner.py`, `curator.py`.
 - Không sửa tests/, tasks/, scripts/, mã PROVIDED, hằng prompt, render_trace hoặc main của runner.
-- Giữ một model, temperature và recursion-limit cho các điều kiện so sánh. Workflow dùng Gemini 3.5 Flash theo model người dùng đã gọi thành công, temperature=1 và recursion-limit=60.
+- Giữ một model, temperature và recursion-limit cho các điều kiện so sánh. Cấu hình hiện tại: `ollama:qwen3-lab:8b`, temperature=0.6 và recursion-limit=60. `Modelfile.lab` đặt context 16384, giới hạn đầu ra 4096, top_p=0.95 và top_k=20.
 - Chỉ phân tích dữ liệu học trước freeze; không đọc check.py, kết quả hoặc đáp án của tác vụ đánh giá để thiết kế skill.
 - Curator tự sinh skill; không sửa tay nội dung. Được xóa skill kém và chạy lại curator tối đa hai lần, ghi rõ lý do.
 - Sau freeze, không sửa bộ skill. Lỗi hạ tầng không được tính là lỗi hành vi của agent.
@@ -63,25 +63,24 @@ Docker nạp .env khi khởi động; nếu đổi cấu hình .env hãy khởi 
 
 ### Kiểm tra cấu hình
 
-Điền cục bộ trong .env, giữ các biến Azure trống nếu dùng Gemini:
+Điền cục bộ trong .env, giữ các biến Azure trống nếu dùng Ollama:
 
 ```dotenv
-LAB_MODEL=google_genai:gemini-3.5-flash
-LAB_TEMPERATURE=1
-GOOGLE_API_KEY=<key thực của bạn>
-GOOGLE_GENAI_USE_VERTEXAI=false
+LAB_MODEL=ollama:qwen3-lab:8b
+LAB_TEMPERATURE=0.6
+OLLAMA_HOST=http://localhost:11434
 ```
 
-Không chép placeholder đè lên key đang hoạt động. Không cần thay model.py.
+Không cần key cho Ollama và không cần thay model.py. Tạo model alias bằng `ollama create qwen3-lab:8b -f Modelfile.lab`. Với runtime hiện tại, dùng `Run-Lab.ps1` từ PowerShell để đặt đúng host cho Docker; xem `LOCAL_MODEL.md`.
 
 ```bash
 python -c "import sys; print(sys.executable)"
 python -c "from lab.model import make_model; m=make_model(); print(type(m).__name__, m.model); print(m.invoke('Reply with OK').text)"
-python -m pip show deepagents langchain-google-genai
+python -m pip show deepagents langchain-ollama
 git check-ignore .env
 ```
 
-Checkpoint: python thuộc Linux/container, model in đúng 3.5 Flash, phản hồi OK, .env được bỏ qua.
+Checkpoint: python thuộc Linux/container, model in đúng qwen3-lab:8b, phản hồi OK, .env được bỏ qua.
 Ghi model, temperature, OS, phiên bản thư viện và recursion-limit vào báo cáo mục 1.
 
 ## 3. Phần 0: test mã có sẵn và làm quen
