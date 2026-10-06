@@ -46,7 +46,7 @@ Chưa tạo tag freeze; chưa chạy hoặc phân tích task eval. Không có sk
 
 Đã chuyển `.env` sang `ollama:qwen3-lab:8b`, temperature=0.6. Ollama 0.35.1 chạy trên Windows; model Qwen3 8B tải thành công và alias được tạo từ `Modelfile.lab` (context 16384, num_predict 4096). Docker gọi model qua `http://host.docker.internal:11434`; `Run-Lab.ps1` đặt biến này cho từng lệnh. Smoke test trả về `OK`; đủ 29 test đạt sau khi cài langchain-ollama 1.1.0 và ollama SDK 0.6.3. GPU/CPU ghi nhận 80%/20% với bộ nhớ model 7.8 GB. Chi tiết tái lập: `LOCAL_MODEL.md`.
 
-Baseline `data-learn` bằng model local đã được khởi chạy. Chỉ khi có run.json mới có thể ghi nhận điểm, lỗi, token và khả năng gọi công cụ. Các thống kê Gemini ở trên là lịch sử hạ tầng, không phải kết quả của cấu hình local.
+Baseline `data-learn` bằng model local đã được khởi chạy. Đã quan sát agent sửa `workspace/sales.csv` trong sandbox (3646 xuống 3543 byte), xác nhận đường gọi công cụ hoạt động. Chưa có run.json tại checkpoint này: chưa ghi nhận điểm, lỗi cuối, token hoặc số tool call. Các thống kê Gemini ở trên là lịch sử hạ tầng, không phải kết quả của cấu hình local. Model thinking mất nhiều thời gian mỗi lượt; không khởi chạy trùng task khi tiến trình hiện tại còn chạy.
 
 ## Tiếp tục với runtime hiện tại
 
