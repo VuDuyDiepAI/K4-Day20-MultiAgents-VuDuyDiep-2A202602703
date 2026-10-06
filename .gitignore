@@ -1,5 +1,8 @@
 .env
 .venv/
+.venv-wsl/
+.uv-cache/
+.lab-wheels/
 __pycache__/
 *.pyc
 .pytest_cache/
