@@ -75,7 +75,8 @@ def curate_skills(results_dir="results", source_condition="baseline", out_dir=No
     runs = []
     for path in sorted((Path(results_dir) / source_condition).glob("*/run.json")):
         run = json.loads(path.read_text(encoding="utf-8"))
-        if run.get("role") != "learn" or run.get("error"):
+        error = run.get("error") or ""
+        if run.get("role") != "learn" or (error and not error.startswith("GraphRecursionError:")):
             continue
         failed = [{"name": check["name"], "detail": check.get("detail", "")}
                   for check in run.get("checks", []) if not check["passed"]]

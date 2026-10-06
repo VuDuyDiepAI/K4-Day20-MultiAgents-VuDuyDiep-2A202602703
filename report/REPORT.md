@@ -8,8 +8,8 @@
 |---|---|---|
 | Vu Duy Diep | 2A202602703 | Triển khai và kiểm tra harness, chạy thí nghiệm, phân tích và viết báo cáo với hỗ trợ Codex. Thông tin tên/MSSV lấy từ tên kho bài lab. |
 
-- Mô hình hiện tại: `ollama:qwen3-lab:8b` (Qwen3 8B local); `LAB_TEMPERATURE=0.6`; `recursion_limit=60`, dùng nhất quán cho ba điều kiện. Context 16384, num_predict 4096, top_p 0.95, top_k 20 theo `Modelfile.lab`.
-- Deep Agents 0.7.21, langchain-google-genai 4.4.0; Python 3.11.16 trên Linux trong container Docker riêng `lab-workflow-linux`. Phiên bản thư viện đầy đủ: `report/environment-linux.txt`. Cài dependency offline bằng wheel Linux sau lỗi tải mạng. Toàn bộ 29 test đạt trên Linux trước khi chạy task thật.
+- Mô hình chính thức: `ollama:qwen3-lab-fast:8b` (Qwen3 8B local); `LAB_TEMPERATURE=0.7`; `recursion_limit=60`, dùng nhất quán cho ba điều kiện. Context 16384, num_predict 4096, top_p 0.8, top_k 20 theo `Modelfile.lab`; adapter loopback đặt `think=false` cho mọi request chat, không thay đổi prompt/công cụ của lab.
+- Deep Agents 0.7.21, langchain-ollama 1.1.0, Ollama SDK 0.6.3, Ollama server 0.35.1; Python 3.11.16 trên Linux trong container Docker riêng `lab-workflow-linux`. Phiên bản thư viện đầy đủ: `report/environment-linux.txt`. Cài dependency offline bằng wheel Linux sau lỗi tải mạng. Toàn bộ 29 test đạt trên Linux sau khi đổi provider. Qwen3 8B dùng context 16K, phân bổ GPU/CPU 80%/20% khi đo ban đầu; thời gian còn phụ thuộc trạng thái tải/cache của máy.
 - Số lần chạy: ba baseline data-learn lỗi hạ tầng (429, 503, 429), lưu riêng trong results-infrastructure, không tính là kết quả hợp lệ; chưa có run chính thức hợp lệ. Tổng token ghi nhận của các lần lỗi: 198.547; thời gian: 438,1 giây. Chi tiết: report/STATUS.md.
 - Commit của tag `freeze`: chưa tạo; chờ dữ liệu học hợp lệ và giả thuyết.
 
@@ -33,9 +33,26 @@
 
 | Tác vụ | Check thất bại | Nhóm lỗi (A-G) | Bằng chứng (trích ngắn từ `detail` hoặc vết) |
 |---|---|---|---|
-| | | | |
+| data-learn / baseline | north_q1_revenue | A: chưa đáp ứng đặc tả đầu ra | Grader không tìm thấy answer.json; 11 tool call chủ yếu đọc CSV và tìm sentinel, kết thúc bằng danh sách dòng thiếu tiền thay vì tạo đầu ra. |
+| data-learn / baseline | north_q1_orders | A | answer.json không tồn tại; chưa có đầu ra để kiểm tra số đơn. |
+| data-learn / baseline | top_region | A | answer.json không tồn tại; không thể kết luận thuật toán tổng hợp đúng hay sai. |
+| data-learn / baseline | duplicate_rows_removed | B: thiếu kiểm chứng hoàn thành | Trace không có execute hoặc write_file; answer.json không tồn tại. |
+| data-learn / baseline | rule_money_in_cents | E: quy ước đầu ra | Thiếu answer.json, nên không đáp ứng quy ước tiền ở dạng cents. |
+| data-learn / baseline | rule_meta_block | E | Thiếu answer.json và khối metadata bắt buộc. |
+| data-learn / baseline | rule_clean_csv | E | Không tạo clean.csv với schema và chuẩn hóa theo feedback RULE. |
+| logs-learn / baseline | valid_structure | A | errors.json không tồn tại. |
+| logs-learn / baseline | entry_count | G: dùng công cụ sai và lặp vô ích | Lặp grep literal ERROR\|CRITICAL dù tool nhắc không hỗ trợ regex; chạm GraphRecursionError sau 30 tool call, không tạo errors.json. |
+| code-learn / baseline | visible_suite_passes | B | Không gọi execute để chạy suite; grader ghi 2 failed, 4 passed. |
+| code-learn / baseline | csv_quoting_follows_docstring | A | Không đọc/sửa nguồn: gọi ls trên tệp Python dẫn tới not_a_directory, rồi kết thúc bằng lời hứa sẽ đọc tệp. |
+| code-learn / baseline | rule_type_hints | E | Thiếu annotation của public function theo feedback RULE. |
+| code-learn / baseline | rule_regression_tests | E | Không tạo tests/test_regressions.py với ít nhất ba test theo quy ước. |
+| code-learn / baseline | rule_changelog | E | Không ghi các mục fix(...) dưới heading Unreleased. |
 
-Nhận xét: nhóm lỗi nào chiếm đa số? Skill có thể phòng ngừa nhóm đó không?
+Ở baseline data-learn, cả 8 check thất bại; 5 check kỹ thuật và 3 check quy ước. Nguyên nhân quan sát trực tiếp là thiếu đầu ra, không phải đã chứng minh tính toán sai. Nhóm hoàn thành đặc tả/kiểm chứng chiếm đa số; skill nhắc lập danh sách deliverable và kiểm tra tồn tại/schema trước khi kết thúc có thể phù hợp. Check missing_amount_orders cũng thất bại vì thiếu answer.json. Không coi mỗi check là một lỗi thuật toán độc lập.
+
+Lượt code-learn trước khi khôi phục LF được lưu riêng, không dùng để sinh skill hoặc so sánh chính thức. Trace ở lượt đó gọi format_name nhưng không định nghĩa hàm, và tuyên bố sửa CSV dù không chạy kiểm chứng; đây là bằng chứng chẩn đoán cho lần thử bị ảnh hưởng môi trường, chưa thay thế kết quả chạy lại.
+
+Baseline chính thức đạt 1/27 check: chỉ tests_not_modified của code-learn đạt. Có 18 check kỹ thuật (1 đạt) và 9 check rule_ (0 đạt); do đó lỗi không chủ yếu là quy ước. Cả hai task dữ liệu/log đều thiếu đầu ra, còn task code không thực hiện sửa nguồn. Curator giữ GraphRecursionError như thất bại của agent dưới ngân sách cố định; các lỗi API/kết nối được bỏ qua. Khi output không tồn tại, nhiều detail chỉ là FileNotFoundError, không tiết lộ quy ước; skill tự sinh sẽ bị giới hạn bởi feedback này.
 
 ## 5. Điều kiện `subagents` (Phần 2.3)
 
@@ -76,9 +93,10 @@ Nhận xét: nhóm lỗi nào chiếm đa số? Skill có thể phòng ngừa nh
 > Nêu ít nhất 3 hạn chế và ảnh hưởng của từng hạn chế đến kết luận (ví dụ: chỉ 3 tác vụ mỗi vai trò, mỗi cấu hình chạy một lần, nhiễu của mô hình, tác vụ do giảng viên thiết kế sẵn quy ước, chỉ một mô hình).
 
 1. Chỉ có ba tác vụ cho mỗi vai trò learn/eval và cùng ba họ do giảng viên thiết kế; kết quả không đại diện cho mọi tác vụ agent thực tế.
-2. Mỗi cấu hình chính thức chỉ chạy một lần và model có temperature=0.6; chênh lệch điểm có thể do nhiễu. So hai lần skills-auto trên tập học chỉ ước lượng nhiễu trên tập học, không tạo khoảng tin cậy cho tập đánh giá.
+2. Mỗi cấu hình chính thức chỉ chạy một lần và model có temperature=0.7; chênh lệch điểm có thể do nhiễu. So hai lần skills-auto trên tập học chỉ ước lượng nhiễu trên tập học, không tạo khoảng tin cậy cho tập đánh giá.
 3. Chỉ dùng một model và một harness; kết luận không thể tự động chuyển sang provider hoặc kiến trúc khác. Token tính cả subagent nhưng trace/tool_calls chỉ thuộc luồng chính, hạn chế phân tích thao tác nội bộ subagent.
 4. Lỗi quota và quá tải API có thể làm task dừng trước khi hoàn tất. Các lần có lỗi hạ tầng được lưu riêng và không dùng làm bằng chứng agent kém hoặc feedback cho curator; ngân sách tổng vẫn cần tính cả chúng.
+5. Context 16K và giới hạn đầu ra 4096 token mỗi lượt có thể hạn chế model có thinking. Hai task baseline data/logs kết thúc với final_message trống và không đủ đầu ra; chưa thể tách năng lực model khỏi ảnh hưởng ngân sách suy luận. Không so trực tiếp tốc độ local với Gemini, vì các lượt Gemini đều lỗi hạ tầng và không có đối chứng hợp lệ.
 
 ## 10. Kết luận
 

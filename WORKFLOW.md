@@ -22,7 +22,7 @@ flowchart TD
 
 - Chỉ triển khai TODO trong `subagents.py`, `agent.py`, `runner.py`, `curator.py`.
 - Không sửa tests/, tasks/, scripts/, mã PROVIDED, hằng prompt, render_trace hoặc main của runner.
-- Giữ một model, temperature và recursion-limit cho các điều kiện so sánh. Cấu hình hiện tại: `ollama:qwen3-lab:8b`, temperature=0.6 và recursion-limit=60. `Modelfile.lab` đặt context 16384, giới hạn đầu ra 4096, top_p=0.95 và top_k=20.
+- Giữ một model, temperature và recursion-limit cho các điều kiện so sánh. Cấu hình hiện tại: `ollama:qwen3-lab-fast:8b`, temperature=0.7 và recursion-limit=60. `Modelfile.lab` đặt context 16384, giới hạn đầu ra 4096, top_p=0.8 và top_k=20.
 - Chỉ phân tích dữ liệu học trước freeze; không đọc check.py, kết quả hoặc đáp án của tác vụ đánh giá để thiết kế skill.
 - Curator tự sinh skill; không sửa tay nội dung. Được xóa skill kém và chạy lại curator tối đa hai lần, ghi rõ lý do.
 - Sau freeze, không sửa bộ skill. Lỗi hạ tầng không được tính là lỗi hành vi của agent.
@@ -66,12 +66,12 @@ Docker nạp .env khi khởi động; nếu đổi cấu hình .env hãy khởi 
 Điền cục bộ trong .env, giữ các biến Azure trống nếu dùng Ollama:
 
 ```dotenv
-LAB_MODEL=ollama:qwen3-lab:8b
-LAB_TEMPERATURE=0.6
-OLLAMA_HOST=http://localhost:11434
+LAB_MODEL=ollama:qwen3-lab-fast:8b
+LAB_TEMPERATURE=0.7
+OLLAMA_HOST=http://127.0.0.1:11435
 ```
 
-Không cần key cho Ollama và không cần thay model.py. Tạo model alias bằng `ollama create qwen3-lab:8b -f Modelfile.lab`. Với runtime hiện tại, dùng `Run-Lab.ps1` từ PowerShell để đặt đúng host cho Docker; xem `LOCAL_MODEL.md`.
+Không cần key cho Ollama và không cần thay model.py. Tạo model alias bằng `ollama create qwen3-lab-fast:8b -f Modelfile.lab`. Với runtime hiện tại, dùng `Run-Lab.ps1` từ PowerShell để đặt đúng host cho Docker; xem `LOCAL_MODEL.md`.
 
 ```bash
 python -c "import sys; print(sys.executable)"
@@ -80,7 +80,7 @@ python -m pip show deepagents langchain-ollama
 git check-ignore .env
 ```
 
-Checkpoint: python thuộc Linux/container, model in đúng qwen3-lab:8b, phản hồi OK, .env được bỏ qua.
+Checkpoint: python thuộc Linux/container, model in đúng qwen3-lab-fast:8b, phản hồi OK, .env được bỏ qua.
 Ghi model, temperature, OS, phiên bản thư viện và recursion-limit vào báo cáo mục 1.
 
 ## 3. Phần 0: test mã có sẵn và làm quen

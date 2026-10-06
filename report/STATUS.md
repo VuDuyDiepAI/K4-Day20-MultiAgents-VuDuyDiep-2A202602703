@@ -44,6 +44,10 @@ Chưa tạo tag freeze; chưa chạy hoặc phân tích task eval. Không có sk
 
 ## Cấu hình Ollama local hiện tại
 
+**Cấu hình chính thức mới:** `ollama:qwen3-lab-fast:8b`, temperature=0.7, context 16384, num_predict 4096, top_p=0.8, top_k=20, think=false. Adapter loopback `Ollama-NoThink.py` dùng API think=false được Ollama hỗ trợ, giữ nguyên prompt/công cụ; native port 11435 và Docker host.docker.internal:11435. Smoke test native/Docker trả OK, 2 token đầu ra. `Run-Lab.ps1` tự khởi động adapter bằng `Start-LabModel.ps1`.
+
+Các baseline Qwen3 thinking data/logs trước đây được chuyển tới results-infrastructure/local-thinking-pilot; không dùng cho curator hay so sánh chính thức. Lượt subagents code thinking chưa kết thúc đã dừng, không có run.json và không có số liệu cuối. Một lượt code được xếp hàng sai đã dừng sớm; không có run.json, không tính vào số lượt hoàn tất. Giữ các số liệu pilot phía dưới như lịch sử cấu hình cũ. Chưa chạy eval hoặc tạo freeze. Đang chạy lại baseline và subagents learn với cấu hình fast nhất quán.
+
 Đã chuyển `.env` sang `ollama:qwen3-lab:8b`, temperature=0.6. Ollama 0.35.1 chạy trên Windows; model Qwen3 8B tải thành công và alias được tạo từ `Modelfile.lab` (context 16384, num_predict 4096). Docker gọi model qua `http://host.docker.internal:11434`; `Run-Lab.ps1` đặt biến này cho từng lệnh. Smoke test trả về `OK`; đủ 29 test đạt sau khi cài langchain-ollama 1.1.0 và ollama SDK 0.6.3. GPU/CPU ghi nhận 80%/20% với bộ nhớ model 7.8 GB. Chi tiết tái lập: `LOCAL_MODEL.md`.
 
 Baseline `data-learn` local đã hoàn tất: 0/8, error=null, 867.6 giây, 43110 token, 4 tool call. Agent sửa dữ liệu nguồn nhưng không tạo answer.json hoặc clean.csv; final_message trống. Đây là lỗi hoàn thành nhiệm vụ, không phải quota API.
