@@ -23,6 +23,7 @@ flowchart TD
 - Chỉ triển khai TODO trong `subagents.py`, `agent.py`, `runner.py`, `curator.py`.
 - Không sửa tests/, tasks/, scripts/, mã PROVIDED, hằng prompt, render_trace hoặc main của runner.
 - Giữ một model, temperature và recursion-limit cho các điều kiện so sánh. Cấu hình hiện tại: `ollama:qwen3-lab-fast:8b`, temperature=0.7 và recursion-limit=60. `Modelfile.lab` đặt context 16384, giới hạn đầu ra 4096, top_p=0.8 và top_k=20.
+- Dùng think=false qua adapter nội bộ và budget 180 giây/task trên Linux. Runner cách ly worker để chặn cả subagent có bound recursion_limit=9999 của thư viện. Các lượt fast đã hoàn tất trước khi thêm guard đều dưới 180 giây; lượt nested data chưa hoàn tất được lưu là gián đoạn rồi chạy lại có guard. Ghi rõ giới hạn và lịch sử này trong báo cáo.
 - Chỉ phân tích dữ liệu học trước freeze; không đọc check.py, kết quả hoặc đáp án của tác vụ đánh giá để thiết kế skill.
 - Curator tự sinh skill; không sửa tay nội dung. Được xóa skill kém và chạy lại curator tối đa hai lần, ghi rõ lý do.
 - Sau freeze, không sửa bộ skill. Lỗi hạ tầng không được tính là lỗi hành vi của agent.

@@ -1,2 +1,4 @@
 # Graders compare original test bytes against canonical LF hashes.
 tasks/** text eol=lf
+# Keep frozen skill hashes reproducible across Windows and Linux checkouts.
+skills/** text eol=lf

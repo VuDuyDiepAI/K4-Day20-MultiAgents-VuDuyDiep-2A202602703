@@ -67,6 +67,10 @@ def run_task(task_id: str, condition: str, results_dir="results", model=None, re
     """
     import tempfile
     import time
+    import os
+    import multiprocessing
+    import signal
+    import threading
     from datetime import datetime, timezone
     from langchain_core.callbacks import UsageMetadataCallbackHandler
     from .agent import build_agent
@@ -91,18 +95,93 @@ def run_task(task_id: str, condition: str, results_dir="results", model=None, re
         before = hash_dir(sandbox / "skills")
         record["skills_sha256"] = before
         start = time.perf_counter()
+        budget = float(os.getenv("LAB_TASK_TIMEOUT_SECONDS", "180"))
+        record["timeout_seconds"] = budget
+        process = receiver = sender = None
         try:
-            agent = build_agent(sandbox, mode=cfg["mode"], use_skills=skills_dir is not None, model=model)
-            for state in agent.stream(
-                {"messages": [{"role": "user", "content": task.instruction}]},
-                config={"callbacks": [usage], "recursion_limit": recursion_limit},
-                stream_mode="values",
-            ):
-                messages = state.get("messages", messages)
-            if messages:
+            if budget <= 0:
+                raise ValueError("LAB_TASK_TIMEOUT_SECONDS must be positive")
+            if hasattr(os, "fork"):
+                context = multiprocessing.get_context("fork")
+                receiver, sender = context.Pipe(duplex=False)
+
+                def worker():
+                    receiver.close()
+                    os.setsid()
+                    lock = threading.Lock()
+
+                    def publish(packet):
+                        with lock:
+                            sender.send(packet)
+
+                    class StreamingUsage(UsageMetadataCallbackHandler):
+                        def on_llm_end(self, *args, **kwargs):
+                            super().on_llm_end(*args, **kwargs)
+                            with lock:
+                                sender.send({"usage": self.usage_metadata.copy()})
+
+                    child_usage = StreamingUsage()
+                    try:
+                        agent = build_agent(sandbox, mode=cfg["mode"], use_skills=skills_dir is not None, model=model)
+                        for state in agent.stream(
+                            {"messages": [{"role": "user", "content": task.instruction}]},
+                            config={"callbacks": [child_usage], "recursion_limit": recursion_limit},
+                            stream_mode="values",
+                        ):
+                            publish({"messages": state.get("messages", [])})
+                    except Exception as exc:
+                        publish({"error": f"{type(exc).__name__}: {exc}"})
+                    finally:
+                        publish({"done": True})
+                        sender.close()
+
+                process = context.Process(target=worker)
+                process.start()
+                sender.close()
+                while True:
+                    remaining = budget - (time.perf_counter() - start)
+                    if remaining <= 0 or not receiver.poll(max(remaining, 0)):
+                        raise TimeoutError(f"Task exceeded the shared {budget:g}-second wall-clock budget")
+                    try:
+                        packet = receiver.recv()
+                    except EOFError as exc:
+                        raise RuntimeError("Agent worker exited before completing its record") from exc
+                    if "messages" in packet:
+                        messages = packet["messages"]
+                    if "usage" in packet:
+                        usage.usage_metadata = packet["usage"]
+                    if "error" in packet:
+                        record["error"] = packet["error"]
+                    if packet.get("done"):
+                        break
+            else:
+                # The shell backend requires Linux/macOS for real task runs.
+                agent = build_agent(sandbox, mode=cfg["mode"], use_skills=skills_dir is not None, model=model)
+                for state in agent.stream(
+                    {"messages": [{"role": "user", "content": task.instruction}]},
+                    config={"callbacks": [usage], "recursion_limit": recursion_limit},
+                    stream_mode="values",
+                ):
+                    messages = state.get("messages", messages)
+            if messages and not record["error"]:
                 record["final_message"] = messages[-1].text
         except Exception as exc:
             record["error"] = f"{type(exc).__name__}: {exc}"
+        finally:
+            if process is not None:
+                if process.is_alive():
+                    try:
+                        os.killpg(process.pid, signal.SIGTERM)
+                    except ProcessLookupError:
+                        process.terminate()
+                process.join(timeout=2)
+                if process.is_alive():
+                    process.kill()
+                    process.join()
+            if receiver is not None:
+                receiver.close()
+            if sender is not None:
+                sender.close()
         record["seconds"] = round(time.perf_counter() - start, 1)
         for item in usage.usage_metadata.values():
             for key, source in (("input", "input_tokens"), ("output", "output_tokens"), ("total", "total_tokens")):

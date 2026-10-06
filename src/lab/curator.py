@@ -76,7 +76,11 @@ def curate_skills(results_dir="results", source_condition="baseline", out_dir=No
     for path in sorted((Path(results_dir) / source_condition).glob("*/run.json")):
         run = json.loads(path.read_text(encoding="utf-8"))
         error = run.get("error") or ""
-        if run.get("role") != "learn" or (error and not error.startswith("GraphRecursionError:")):
+        behavior_failure = error.startswith((
+            "GraphRecursionError:", "TimeoutError: Task exceeded",
+            "ResponseError: prediction aborted, token repeat limit reached",
+        ))
+        if run.get("role") != "learn" or (error and not behavior_failure):
             continue
         failed = [{"name": check["name"], "detail": check.get("detail", "")}
                   for check in run.get("checks", []) if not check["passed"]]
