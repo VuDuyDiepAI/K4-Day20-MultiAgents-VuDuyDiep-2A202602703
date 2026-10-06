@@ -51,8 +51,24 @@ def make_backend(sandbox: Path):
     import sys
     from deepagents.backends import LocalShellBackend
 
+    import shlex
+
     sandbox = Path(sandbox).resolve()
-    return LocalShellBackend(
+
+    class _DroppedShellBackend(LocalShellBackend):
+        """Khi runner chạy bằng root, lệnh shell của tác tử chạy bằng user không đặc quyền."""
+
+        def execute(self, command, *, timeout=None):
+            if hasattr(os, "geteuid") and os.geteuid() == 0 and isinstance(command, str) and command:
+                command = ("setpriv --reuid=10001 --regid=10001 --clear-groups /bin/sh -c "
+                           + shlex.quote(command))
+            return super().execute(command, timeout=timeout)
+
+    if hasattr(os, "geteuid") and os.geteuid() == 0:
+        import subprocess
+        subprocess.run(["chown", "-R", "10001:10001", str(sandbox)], check=False)
+    backend_cls = _DroppedShellBackend
+    return backend_cls(
         root_dir=sandbox, virtual_mode=True, inherit_env=False,
         env={
             "PATH": os.pathsep.join([str(Path(sys.executable).parent), "/usr/local/bin", "/usr/bin", "/bin"]),

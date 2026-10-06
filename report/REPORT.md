@@ -58,17 +58,20 @@ Baseline chính thức đạt 1/27 check: chỉ tests_not_modified của code-le
 ## 5. Điều kiện `subagents` (Phần 2.3)
 
 - Các subagent đã định nghĩa: `explorer` đọc đặc tả, khảo sát code/dữ liệu/log và đề xuất kế hoạch dựa trên bằng chứng; `reviewer` chạy kiểm tra độc lập trên đầu ra và báo lỗi cụ thể. Cả hai được yêu cầu không sửa tệp. Tách điều tra và kiểm chứng để tác tử chính giữ trách nhiệm thực hiện, đồng thời tránh hai tác tử sửa cùng tệp. Mode single vẫn có general-purpose mặc định; mode subagents bổ sung hai vai trò này.
-- `subagent_calls` ở từng tác vụ và nhận xét (kể cả trường hợp bằng 0):
-- Thông tin thiếu hoặc thừa khi giao việc (nếu có giao việc):
-- Ảnh hưởng đến token và thời gian:
+- `subagent_calls`: code-learn=1, data-learn=1, logs-learn=6; tất cả lệnh task trong trace chính chọn general-purpose, không chọn explorer/reviewer. Cả hai điều kiện đạt 1/27 check học; điểm trung bình theo task đều 0.0333. Việc bổ sung vai trò chuyên biệt chưa tạo cải thiện khi model không chọn chúng.
+- Code chuyển phần lớn đề bài và ràng buộc không sửa tests sang subagent. Data giao các bước tính toán nhưng thiếu đường dẫn input/output cụ thể và quy tắc missing/dedup đầy đủ. Logs gọi lại cùng một prompt sáu lần nhưng không nêu workspace/app.log hay workspace/errors.json; báo cáo con có lần tìm /var/log/system.log không tồn tại. Tác tử chính chưa bổ sung context hoặc kiểm chứng khi nhận kết quả không phù hợp.
+- Token học ghi nhận: baseline 374955 (trung bình 124985), subagents 494064 (trung bình 164688), tăng khoảng 31.8%. Thời gian tổng baseline 182.5 giây, subagents 484.5 giây. Code dừng vì giới hạn lặp token, data/logs dừng vì deadline 180 giây. Callback bao gồm các request đã hoàn tất của subagent (đã kiểm tra offline chính xác 360 token cho 2 lượt cha + 1 lượt con); token request bị cắt giữa chừng chưa có metadata không được tính. Chưa thể coi đây là toàn bộ chi phí suy luận.
 
 ## 6. Self-evolving: skill do curator sinh (Phần 3)
 
-- Số lần chạy curator, số skill bị xóa và lý do:
+- Curator: lần 1 bị gián đoạn khi xử lý lỗi hàng đợi/cancellation, chưa có phản hồi hay skill; lần 2 hoàn tất trong 56.1 giây, 8815 token, nhưng cả ba tên dùng underscore nên validator loại toàn bộ. Lưu nguyên bản tại report/curator-response-2.md và audit/input cùng số thứ tự. Trước lần 3, prompt được nhấn mạnh lại regex tên và cấm underscore; không sửa tay phản hồi hoặc nội dung skill. Lần 3 là lần thử cuối trong giới hạn một lần đầu và tối đa hai lần chạy lại.
 
 | Skill | Tổng quát hay riêng cho tác vụ học? | Đúng hay sai (nêu chỗ sai nếu có) | Độ dài, `description` và `skills_read` ở Phần 3.4 |
 |---|---|---|---|
-| | | | |
+| fix-code-structure | Dùng được cho package Python khác; không chứa tên hàm/input/đáp án riêng. | Hướng dẫn thêm type annotation khớp RULE. Các bước kiểm tra docstring/PEP8/maintainability khá chung và lặp; không có lệnh test cụ thể, không khắc phục trực tiếp lỗi chọn công cụ. Việc đổi tên hàm để “descriptive” có nguy cơ ảnh hưởng API nếu áp dụng thiếu kiểm chứng. Giữ nguyên để đo tác dụng thực tế, không sửa tay. | 21 dòng tổng, 17 dòng body. Description bắt đầu Use when, nhắm code thiếu type annotation/quy ước; dev metrics chờ kết quả. |
+| update-documents | Quy trình changelog dùng lại cho thay đổi code; tên tệp/heading/format được RULE cho phép giữ. | Format fix(...) và heading Unreleased đúng feedback. Có nhiều bước lặp kiểm tra formatting; “ít nhất ba bullet” là quy ước học, không phải bảo đảm phù hợp mọi tác vụ mới. Cần các mục phản ánh fix thực tế; skill không bảo đảm agent đã sửa lỗi. | 16 dòng tổng, 12 dòng body. Description Use when nhắm documentation/changelog; dev metrics chờ kết quả. |
+
+Lần 3 hoàn tất trong 73.9 giây, 9249 token; ghi hai skill trên. clean-data-format bị validator loại vì từ “orders” trùng marker từ filename của tập đánh giá. Từ này cũng là từ thông thường trong đề bài học, nên rejection không chứng minh curator đã thấy dữ liệu đánh giá; giữ nguyên guard thận trọng, không sửa/bỏ kiểm tra. Không có skill hợp lệ bị xóa thủ công, không chạy lần thứ tư. Bộ cuối chỉ nhắm code/changelog, thiếu skill trực tiếp cho data/log. Tổng token hai phản hồi curator hoàn tất là 18064; lượt bị gián đoạn không có usage cuối.
 
 ## 7. Kết quả so sánh (Phần 4.3, 4.4)
 

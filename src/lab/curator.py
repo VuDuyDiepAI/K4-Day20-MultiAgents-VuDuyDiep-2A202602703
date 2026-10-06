@@ -103,6 +103,9 @@ def curate_skills(results_dir="results", source_condition="baseline", out_dir=No
         "=== SKILL: <name> ===\n---\nname: <name>\ndescription: Use when ...\n---\n"
         "<instructions>\n=== END ===\n\n"
         + json.dumps(runs, ensure_ascii=False, indent=2)
+        + "\nFINAL FORMAT CHECK: skill names must match ^[a-z0-9]+(-[a-z0-9]+)*$. "
+        "Use hyphens between words, NEVER underscores. Repeat the identical name in the block header "
+        "and YAML name field. Underscores cause the entire skill to be rejected. Output only the skill blocks."
     )
     response = (model if model is not None else make_model()).invoke(prompt)
     reply = response.text

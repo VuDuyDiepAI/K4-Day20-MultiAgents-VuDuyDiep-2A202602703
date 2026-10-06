@@ -1,0 +1,75 @@
+{
+  "task": "code-learn",
+  "condition": "subagents",
+  "role": "learn",
+  "timestamp": "2026-10-06T16:38:06.390883+00:00",
+  "error": null,
+  "tokens": {
+    "input": 365447,
+    "output": 9315,
+    "total": 374762
+  },
+  "tool_calls": 23,
+  "subagent_calls": 1,
+  "skills_read": 0,
+  "skills_modified": false,
+  "seconds": 71.8,
+  "final_message": "All checks pass (10/10), the original test file is byte-identical, and Python 3.11 supports the builtin generics used.\n\n## Summary\n\nThe `inventory` package had four functions that didn't match their docstrings. I fixed each one:\n\n**`workspace/inventory/pricing.py`**\n- `parse_price` — now strips whitespace, removes `$` and thousands separators (`,`), and treats surrounding parentheses as a negative sign (accounting style). Previously `\"$1,299.50\"` raised `InvalidOperation` and `\"(12.00)\"` was unsupported.\n- `apply_discount` — now quantizes with `ROUND_HALF_UP` instead of the default `ROUND_HALF_EVEN`, so `10.05` at 10% gives `9.05` (was `9.04`).\n\n**`workspace/inventory/report.py`**\n- `low_stock` — now uses a strict `<` comparison (was `<=`) and sorts names alphabetically ignoring case, as the docstring requires.\n\n**`workspace/inventory/export.py`**\n- `to_csv_row` — now applies RFC 4180 quoting to the name: wrapped in double quotes with inner quotes doubled when it contains a comma or a double quote. Only the name is inspected, so a price's thousands separator doesn't trigger quoting.\n\n**Convention compliance (Acme review bot rules)**\n- Added full type annotations (parameters + return) to every public function in the package.\n- Created `workspace/tests/test_regressions.py` with 4 regression tests, one per fixed bug.\n- Recorded all four fixes in `workspace/CHANGELOG.md` under `## Unreleased` as `- fix(<function>): <description>` bullets.\n\n`workspace/tests/test_report.py` was left untouched (sha256 verified). Final result: `10 passed` in pytest and `score 1.0 (10/10)` on the checker.",
+  "skills_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "timeout_seconds": 180.0,
+  "score": 1.0,
+  "passed": 10,
+  "total": 10,
+  "checks": [
+    {
+      "name": "visible_suite_passes",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "tests_not_modified",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "parse_price_all_formats",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "other_caller_fixed",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "discount_rounds_half_up",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "low_stock_follows_docstring",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "csv_quoting_follows_docstring",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "rule_type_hints",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "rule_regression_tests",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "rule_changelog",
+      "passed": true,
+      "detail": ""
+    }
+  ]
+}
