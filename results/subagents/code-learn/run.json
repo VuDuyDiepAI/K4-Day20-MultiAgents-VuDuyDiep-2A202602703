@@ -1,0 +1,75 @@
+{
+  "task": "code-learn",
+  "condition": "subagents",
+  "role": "learn",
+  "timestamp": "2026-10-06T16:57:04.866375+00:00",
+  "error": null,
+  "tokens": {
+    "input": 298160,
+    "output": 8248,
+    "total": 306408
+  },
+  "tool_calls": 29,
+  "subagent_calls": 1,
+  "skills_read": 0,
+  "skills_modified": false,
+  "seconds": 55.2,
+  "final_message": "The test file is untouched (mtime unchanged) and the full suite passes.\n\n## Summary\n\nThe `inventory` package had four bugs where the code contradicted its own docstrings. I fixed the source only — nothing under `workspace/tests/` was modified.\n\n**`workspace/inventory/pricing.py`**\n- `parse_price`: now strips thousands separators (`,`) and handles accounting-style parentheses, so `\"$1,299.50\"` → `Decimal(\"1299.50\")` and `\"(12.00)\"` → `Decimal(\"-12.00\")` (previously raised `InvalidOperation`).\n- `apply_discount`: now quantizes with `rounding=ROUND_HALF_UP` instead of the default `ROUND_HALF_EVEN`, so `apply_discount(Decimal(\"10.05\"), 10)` → `9.05` (was `9.04`).\n\n**`workspace/inventory/report.py`**\n- `low_stock`: now filters with `<` (strictly below the threshold, was `<=`) and returns names sorted case-insensitively via `sorted(names, key=str.lower)` (previously unsorted).\n\n**`workspace/inventory/export.py`**\n- `to_csv_row`: now applies RFC 4180 quoting to the name field — wrapping it in double quotes and doubling inner quotes when it contains a comma or a double quote (previously emitted broken CSV).\n\nPublic API, signatures, module layout and docstrings are unchanged; only the standard library (`decimal`) is used. Result: `6 passed` for the visible suite, plus all docstring-derived edge cases (parentheses, thousands separators, half-up rounding, case-insensitive sorting, CSV quoting) verified independently.",
+  "skills_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "timeout_seconds": 180.0,
+  "score": 0.7,
+  "passed": 7,
+  "total": 10,
+  "checks": [
+    {
+      "name": "visible_suite_passes",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "tests_not_modified",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "parse_price_all_formats",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "other_caller_fixed",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "discount_rounds_half_up",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "low_stock_follows_docstring",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "csv_quoting_follows_docstring",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "rule_type_hints",
+      "passed": false,
+      "detail": "RULE: every public function (name not starting with '_') in the package has type annotations on all parameters and on the return value."
+    },
+    {
+      "name": "rule_regression_tests",
+      "passed": false,
+      "detail": "RULE: add tests/test_regressions.py with one test function per bug you fixed (at least 3); the file must pass."
+    },
+    {
+      "name": "rule_changelog",
+      "passed": false,
+      "detail": "RULE: record each fix in CHANGELOG.md under the heading '## Unreleased' as a bullet '- fix(<function name>): <short description>' (at least 3 bullets)."
+    }
+  ]
+}

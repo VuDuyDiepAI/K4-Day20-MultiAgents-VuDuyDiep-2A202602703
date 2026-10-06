@@ -18,9 +18,9 @@
 
 > Dự đoán điều kiện nào đạt điểm cao nhất trên **tác vụ đánh giá** và vì sao. Nêu căn cứ từ phân loại lỗi (mục 4) và từ tài liệu tham khảo. Điền cả ba dòng; `verify_freeze.py` kiểm tra điều này.
 
-- H1 (subagents so với baseline):
-- H2 (skills-auto so với baseline):
-- H3 (tác vụ học so với tác vụ đánh giá):
+- H1 (subagents so với baseline): `subagents` sẽ đạt điểm trung bình cao hơn `baseline` trên tác vụ đánh giá. Căn cứ từ tập học (DeepSeek, cách ly): baseline 1/27 check (code 1/10, data 0/8, logs 0/9; cả ba chạm GraphRecursionError ở giới hạn 60) so với subagents 21/27 (code 7/10, data 8/8, logs 6/9). Tôi dự đoán lợi thế giữ lại nhưng nhỏ hơn, vì chênh lệch học lớn có thể một phần do nhiễu (một lần chạy, temperature 0). Chi phí token dự kiến thấp hơn hoặc ngang baseline do baseline lặp công cụ đến khi hết giới hạn.
+- H2 (skills-auto so với baseline): `skills-auto` sẽ cao hơn `baseline` nhưng thấp hơn `subagents` trên tác vụ đánh giá. Căn cứ: ba skill sinh ra (fix-failing-tests-incrementally, locate-project-files-before-editing, produce-required-output-artifacts) mang tính quy trình chung; trên tập học skills-auto đạt 9/27 (code 9/10, data 0/8, logs 0/9), tức chỉ cải thiện ở code, còn data/logs vẫn chạm giới hạn đệ quy. Phần lớn check quy ước (rule_) trong tập đánh giá là quy ước mới nên skill không thể biết trước; tôi chỉ kỳ vọng cải thiện ở nhóm check kỹ thuật của code-eval.
+- H3 (tác vụ học so với tác vụ đánh giá): điểm trên tác vụ đánh giá sẽ thấp hơn tác vụ học ở mọi điều kiện, đặc biệt `skills-auto`, vì tác vụ đánh giá thêm một quy ước mới và dùng dữ liệu khác; khoảng cách học-đánh giá của skills-auto sẽ lớn hơn của subagents, vì skill chỉ mã hóa kinh nghiệm của tập học.
 
 ## 3. Làm quen Deep Agents (Phần 0.3)
 
