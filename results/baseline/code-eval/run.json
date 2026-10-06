@@ -1,0 +1,80 @@
+{
+  "task": "code-eval",
+  "condition": "baseline",
+  "role": "eval",
+  "timestamp": "2026-10-06T17:01:50.852320+00:00",
+  "error": null,
+  "tokens": {
+    "input": 44036,
+    "output": 2295,
+    "total": 46331
+  },
+  "tool_calls": 17,
+  "subagent_calls": 0,
+  "skills_read": 0,
+  "skills_modified": false,
+  "seconds": 15.7,
+  "final_message": "All three source modules are fixed and the full suite passes.\n\n## Summary\n\nThe test suite failed for three independent reasons, each a mismatch between the code and its docstring. I changed only source files under `workspace/bookings/`; `tests/` was left untouched.\n\n**`bookings/timeutil.py` — `parse_duration`**\nThe regex only accepted the `\"1h30m\"` form, so `\"2h\"`, `\"45m\"`, `\"1:30\"` and bare `\"45\"` all raised `ValueError`. I replaced the single pattern with a small set of module-level compiled patterns (avoids recompiling on every call) and match them in order: hours+optional minutes, minutes-only, `H:MM` clock form, then bare minutes. Whitespace is stripped once up front, and anything unrecognised still raises `ValueError` with the original text in the message.\n\n**`bookings/schedule.py` — `add_slot`**\nThe default argument `slots=[]` is a mutable default shared across calls, so state leaked between invocations and the function mutated the caller's list. I switched to `slots=None` with an explicit `slots = []` inside, and now return a new list (`[*slots, slot]`) instead of appending in place, so the input list is never modified.\n\n**`bookings/billing.py` — `billable_blocks`**\n`round()` rounds half-to-even and rounds *down* for partial blocks, so 20 minutes gave 1 block instead of 2. I replaced it with `math.ceil(minutes / block)` to always round up, and added the documented `ValueError` for negative `minutes`, which was previously unguarded.\n\nI also verified the docstring spec beyond the visible tests (all five duration formats plus whitespace and invalid inputs, `add_slot` non-sharing and non-mutation, block rounding at exact/partial boundaries and custom block sizes, the negative-minutes error, and `slot_end`/`total_minutes`), and `python -m pytest tests -q` now reports 3 passed.",
+  "skills_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "timeout_seconds": 180.0,
+  "score": 0.6363636363636364,
+  "passed": 7,
+  "total": 11,
+  "checks": [
+    {
+      "name": "visible_suite_passes",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "tests_not_modified",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "parse_duration_all_formats",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "other_caller_fixed",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "billable_blocks_round_up",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "add_slot_no_shared_state",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "negative_minutes_rejected",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "rule_type_hints",
+      "passed": false,
+      "detail": ""
+    },
+    {
+      "name": "rule_regression_tests",
+      "passed": false,
+      "detail": ""
+    },
+    {
+      "name": "rule_changelog",
+      "passed": false,
+      "detail": ""
+    },
+    {
+      "name": "rule_version_bump",
+      "passed": false,
+      "detail": ""
+    }
+  ]
+}

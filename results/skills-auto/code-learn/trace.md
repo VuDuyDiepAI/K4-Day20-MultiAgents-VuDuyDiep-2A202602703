@@ -305,11 +305,11 @@ E    +  and   Decimal('9.05') = Decimal('9.05')
 ### Assistant
 Two failures. Let me analyze each against the docstrings.
 
-**Bug 1 — `parse_price`**: doesn't handle thousands separators (`,`) or accounting-style parentheses for negatives.
+**Failure 1 — `parse_price`**: doesn't handle thousands separators `,` or accounting parentheses `(12.00)`.
 
-**Bug 2 — `apply_discount`**: uses default `ROUND_HALF_EVEN`; docstring requires `ROUND_HALF_UP`.
+**Failure 2 — `apply_discount`**: `Decimal.quantize` defaults to `ROUND_HALF_EVEN`, but the docstring requires `ROUND_HALF_UP`. `10.05 * 90 / 100 = 9.045` → half-even gives `9.04`, half-up gives `9.05`.
 
-Also, `low_stock` docstring says "strictly below `threshold`" and "sorted alphabetically, ignoring case" — the code uses `<=` and no sorting. And `to_csv_row` docstring requires RFC 4180 quoting, which isn't implemented. Let me fix all of these.
+Also, `low_stock` docstring says "strictly below `threshold`" but the code uses `<=`, and "sorted alphabetically, ignoring case" but the code doesn't sort. And `to_csv_row` docstring requires RFC 4180 quoting, which isn't implemented. Let me fix all of these.
 
 ### Tool call: edit_file
 {"file_path": "/workspace/inventory/pricing.py", "old_string": "\"\"\"Price utilities for the inventory package.\"\"\"\nfrom decimal import Decimal\n\n\ndef parse_price(text):\n    \"\"\"Convert a price string to a Decimal.\n\n    Supported formats:\n      \"$1,299.50\" -> Decimal(\"1299.50\")\n      \"  12 \"     -> Decimal(\"12\")\n      \"1299.5\"    -> Decimal(\"1299.5\")\n      \"(12.00)\"   -> Decimal(\"-12.00\")   # accounting style: parentheses mean negative\n    \"\"\"\n    cleaned = text.strip().replace(\"$\", \"\")\n    return Decimal(cleaned)\n\n\ndef apply_discount(price, percent):\n    \"\"\"Return `price` after a percentage discount.\n\n    The result is a Decimal rounded to 2 decimal places using the\n    commercial rule \"round half up\" (0.005 -> 0.01).\n    \"\"\"\n    discounted = price * (100 - percent) / 100\n    return discounted.quantize(Decimal(\"0.01\"))", "new_string": "\"\"\"Price utilities for the inventory package.\"\"\"\nfrom decimal import ROUND_HALF_UP, Decimal\n\n_CENTS = Decimal(\"0.01\")\n\n\ndef parse_price(text: str) -> Decimal:\n    \"\"\"Convert a price string to a Decimal.\n\n    Supported formats:\n      \"$1,299.50\" -> Decimal(\"1299.50\")\n      \"  12 \"     -> Decimal(\"12\")\n      \"1299.5\"    -> Decimal(\"1299.5\")\n      \"(12.00)\"   -> Decimal(\"-12.00\")   # accounting style: parentheses mean negative\n    \"\"\"\n    cleaned = text.strip().replace(\"$\", \"\").replace(\",\", \"\")\n    negative = cleaned.startswith(\"(\"
@@ -318,7 +318,7 @@ Also, `low_stock` docstring says "strictly below `threshold`" and "sorted alphab
 Successfully replaced 1 instance(s) of the string in '/workspace/inventory/pricing.py'
 
 ### Assistant
-Now `report.py` — `low_stock` needs strict `<` and case-insensitive alphabetical sorting:
+Now `report.py` — fix `low_stock` (strictly below, case-insensitive sort) and add annotations:
 
 ### Tool call: edit_file
 {"file_path": "/workspace/inventory/report.py", "new_string": "\"\"\"Inventory reports.\"\"\"\nfrom decimal import Decimal\nfrom typing import Any, Iterable\n\nfrom .pricing import apply_discount, parse_price\n\n\ndef total_value(items: Iterable[dict[str, Any]]) -> Decimal:\n    \"\"\"Total value of `items` after per-item discounts.\n\n    Each item is a dict: {\"name\": str, \"price\": str, \"qty\": int, \"discount\": percent (optional)}.\n    \"\"\"\n    total = Decimal(\"0\")\n    for item in items:\n        price = parse_price(item[\"price\"])\n        price = apply_discount(price, item.get(\"discount\", 0))\n        total += price * item[\"qty\"]\n    return total\n\n\ndef low_stock(items: Iterable[dict[str, Any]], threshold: int = 5) -> list[str]:\n    \"\"\"Names of the items whose quantity is strictly below `threshold`.\n\n    The names are sorted alphabetically, ignoring case.\n    \"\"\"\n    names = [item[\"name\"] for item in items if item[\"qty\"] < threshold]\n    return sorted(names, key=str.lower)", "old_string": "\"\"\"Inventory reports.\"\"\"\nfrom decimal import Decimal\n\nfrom .pricing import apply_discount, parse_price\n\n\ndef total_value(items):\n    \"\"\"Total value of `items` after per-item discounts.\n\n    Each item is a dict: {\"name\": str, \"price\": str, \"qty\": int, \"discount\": percent (optional)}.\n    \"\"\"\n    total = Decimal(\"0\")\n    for item in items:\n        price = parse_price(item[\"price\"])\n        price = apply_discount(pr
@@ -327,7 +327,7 @@ Now `report.py` — `low_stock` needs strict `<` and case-insensitive alphabetic
 Successfully replaced 1 instance(s) of the string in '/workspace/inventory/report.py'
 
 ### Assistant
-Now `export.py` — RFC 4180 quoting:
+Now `export.py` — implement RFC 4180 quoting and add annotations:
 
 ### Tool call: edit_file
 {"file_path": "/workspace/inventory/export.py", "new_string": "\"\"\"Export helpers.\"\"\"\nfrom typing import Any\n\nfrom .pricing import parse_price\n\n\ndef to_csv_row(item: dict[str, Any]) -> str:\n    \"\"\"Format one item as a CSV row: name,price,qty (price with 2 decimals).\n\n    A name that contains a comma or a double quote is wrapped in double quotes,\n    and every double quote inside it is doubled (RFC 4180).\n    \"\"\"\n    price = parse_price(item[\"price\"])\n    name = item[\"name\"]\n    if \",\" in name or '\"' in name:\n        name = '\"' + name.replace('\"', '\"\"') + '\"'\n    return f\"{name},{price:.2f},{item['qty']}\"", "old_string": "\"\"\"Export helpers.\"\"\"\nfrom .pricing import parse_price\n\n\ndef to_csv_row(item):\n    \"\"\"Format one item as a CSV row: name,price,qty (price with 2 decimals).\n\n    A name that contains a comma or a double quote is wrapped in double quotes,\n    and every double quote inside it is doubled (RFC 4180).\n    \"\"\"\n    price = parse_price(item[\"price\"])\n    return f'{item[\"name\"]},{price:.2f},{item[\"qty\"]}'"}
@@ -345,55 +345,97 @@ Successfully replaced 1 instance(s) of the string in '/workspace/inventory/expor
 [Command succeeded with exit code 0]
 
 ### Assistant
-All 6 pass. Now let me verify the docstring-specified behaviours that the visible tests don't cover, and check the Acme conventions. Let me look for any convention docs.
+All 6 pass. Now let me verify the docstring behaviors that the visible tests don't cover, and check the Acme conventions. Let me look for any convention docs.
 
 ### Tool call: execute
-{"command": "cd workspace && python -c \"\nfrom decimal import Decimal\nfrom inventory.pricing import parse_price, apply_discount\nfrom inventory.report import low_stock, total_value\nfrom inventory.export import to_csv_row\n\nprint(parse_price('\\$1,299.50'), parse_price('  12 '), parse_price('1299.5'), parse_price('(12.00)'))\nprint(parse_price('(\\$1,299.50)'))\nprint(apply_discount(Decimal('10.05'), 10), apply_discount(Decimal('0.005'), 0), apply_discount(Decimal('10.00'), 0))\nprint(low_stock([{'name':'Zed','qty':1},{'name':'apple','qty':2},{'name':'Mango','qty':5},{'name':'kiwi','qty':4}]))\nprint(to_csv_row({'name':'a,b','price':'2.5','qty':4}))\nprint(to_csv_row({'name':'say \\\"hi\\\"','price':'2.5','qty':4}))\nprint(to_csv_row({'name':'plain','price':'2.5','qty':4}))\nprint(total_value([{'name':'x','price':'(5.00)','qty':2}]))\n\""}
+{"command": "cd workspace && python -c \"\nfrom decimal import Decimal\nfrom inventory.pricing import parse_price, apply_discount\nfrom inventory.report import low_stock, total_value\nfrom inventory.export import to_csv_row\n\n# parse_price formats\nprint(parse_price('\\$1,299.50'))\nprint(parse_price('  12 '))\nprint(parse_price('1299.5'))\nprint(parse_price('(12.00)'))\nprint(parse_price('(\\$1,299.50)'))\n# rounding half up\nprint(apply_discount(Decimal('10.05'), 10))\nprint(apply_discount(Decimal('0.005'), 0))\nprint(apply_discount(Decimal('1.005'), 0))\n# low_stock strictly below + case-insensitive sort\nprint(low_stock([{'name':'Zebra','qty':1},{'name':'apple','qty':4},{'name':'Mango','qty':5}]))\nprint(low_stock([{'name':'a','qty':5}]))\n# csv quoting\nprint(to_csv_row({'name':'a,b','price':'2.5','qty':4}))\nprint(to_csv_row({'name':'a\\\"b','price':'2.5','qty':4}))\nprint(to_csv_row({'name':'plain','price':'\\$1,299.50','qty':2}))\n\""}
 
 ### Tool result
-1299.50 12 1299.5 -12.00
+1299.50
+12
+1299.5
+-12.00
 -1299.50
-9.05 0.01 10.00
-['apple', 'kiwi', 'Zed']
+9.05
+0.01
+1.01
+['apple', 'Zebra']
+[]
 "a,b",2.50,4
-"say ""hi""",2.50,4
-plain,2.50,4
--10.00
+"a""b",2.50,4
+plain,1299.50,2
 
 [Command succeeded with exit code 0]
 
 ### Assistant
-All docstring behaviours hold. Now let me check the Acme Python team conventions — the review bot checks against them. Let me search for any convention files.
+All docstring behaviors work. Now let me check the Acme Python team conventions — the review bot checks against them. Let me search for any convention files.
 
 ### Tool call: execute
 {"command": "cd workspace && ls -la && ls -la .. 2>/dev/null; find / -iname \"*convention*\" -o -iname \"*CONTRIBUTING*\" -o -iname \"*.acme*\" 2>/dev/null | grep -v proc | head -20"}
 
 ### Tool result
 total 28
-drwxr-xr-x 5 appuser appuser 4096 Oct  6 16:59 .
-drwx------ 4 appuser appuser 4096 Oct  6 16:59 ..
-drwxr-xr-x 3 appuser appuser 4096 Oct  6 16:59 .pytest_cache
+drwxr-xr-x 5 appuser appuser 4096 Oct  6 17:06 .
+drwx------ 4 appuser appuser 4096 Oct  6 17:06 ..
+drwxr-xr-x 3 appuser appuser 4096 Oct  6 17:06 .pytest_cache
 -rwxr-xr-x 1 appuser appuser   60 Oct  6 02:57 CHANGELOG.md
 -rwxr-xr-x 1 appuser appuser  124 Oct  6 02:57 README.md
 drwxr-xr-x 3 appuser appuser 4096 Oct  6 03:52 inventory
 drwxr-xr-x 3 appuser appuser 4096 Oct  6 03:52 tests
 total 16
-drwx------ 4 appuser appuser 4096 Oct  6 16:59 .
-drwxrwxrwt 1 root    root    4096 Oct  6 16:59 ..
-drwxr-xr-x 5 appuser appuser 4096 Oct  6 16:59 skills
-drwxr-xr-x 5 appuser appuser 4096 Oct  6 16:59 workspace
+drwx------ 4 appuser appuser 4096 Oct  6 17:06 .
+drwxrwxrwt 1 root    root    4096 Oct  6 17:07 ..
+drwxr-xr-x 5 appuser appuser 4096 Oct  6 17:06 skills
+drwxr-xr-x 5 appuser appuser 4096 Oct  6 17:06 workspace
 /usr/share/perl/5.40.1/Test2/Manual/Contributing.pm
 
 [Command succeeded with exit code 0]
 
 ### Assistant
-No convention file present. The skill's completion checks define the expected conventions: type annotations on all params/return values, a regression test file, and a changelog entry. Let me verify annotations are complete and add the regression tests + changelog.
+No convention file present. The skill's completion checks define the conventions to follow: type annotations on all params/return values, a regression test file, and a changelog entry. Let me verify annotations are complete and add the regression tests + changelog.
+
+### Tool call: read_file
+{"file_path": "/workspace/inventory/pricing.py"}
 
 ### Tool call: read_file
 {"file_path": "/workspace/inventory/report.py"}
 
 ### Tool call: read_file
 {"file_path": "/workspace/inventory/export.py"}
+
+### Tool result
+@@ lines 1-31 of 31 @@
+"""Price utilities for the inventory package."""
+from decimal import ROUND_HALF_UP, Decimal
+
+_CENTS = Decimal("0.01")
+
+
+def parse_price(text: str) -> Decimal:
+    """Convert a price string to a Decimal.
+
+    Supported formats:
+      "$1,299.50" -> Decimal("1299.50")
+      "  12 "     -> Decimal("12")
+      "1299.5"    -> Decimal("1299.5")
+      "(12.00)"   -> Decimal("-12.00")   # accounting style: parentheses mean negative
+    """
+    cleaned = text.strip().replace("$", "").replace(",", "")
+    negative = cleaned.startswith("(") and cleaned.endswith(")")
+    if negative:
+        cleaned = cleaned[1:-1].strip()
+    value = Decimal(cleaned)
+    return -value if negative else value
+
+
+def apply_discount(price: Decimal, percent: float) -> Decimal:
+    """Return `price` after a percentage discount.
+
+    The result is a Decimal rounded to 2 decimal places using the
+    commercial rule "round half up" (0.005 -> 0.01).
+    """
+    discounted = price * (100 - percent) / 100
+    return discounted.quantize(_CENTS, rounding=ROUND_HALF_UP)
 
 ### Tool result
 @@ lines 1-27 of 27 @@
@@ -446,13 +488,13 @@ def to_csv_row(item: dict[str, Any]) -> str:
     return f"{name},{price:.2f},{item['qty']}"
 
 ### Assistant
-All public functions now have full annotations. Now the regression test file and changelog entry.
+All public functions have full annotations. Now let me add the regression test file and changelog entry.
 
 ### Tool call: write_file
-{"file_path": "/workspace/tests/test_regressions.py", "content": "\"\"\"Regression tests for bugs fixed in the inventory package.\"\"\"\nfrom decimal import Decimal\n\nfrom inventory.export import to_csv_row\nfrom inventory.pricing import apply_discount, parse_price\nfrom inventory.report import low_stock\n\n\ndef test_parse_price_thousands_separator():\n    assert parse_price(\"$1,299.50\") == Decimal(\"1299.50\")\n\n\ndef test_parse_price_accounting_negative():\n    assert parse_price(\"(12.00)\") == Decimal(\"-12.00\")\n\n\ndef test_parse_price_accounting_negative_with_symbols():\n    assert parse_price(\"($1,299.50)\") == Decimal(\"-1299.50\")\n\n\ndef test_parse_price_whitespace_and_plain():\n    assert parse_price(\"  12 \") == Decimal(\"12\")\n    assert parse_price(\"1299.5\") == Decimal(\"1299.5\")\n\n\ndef test_apply_discount_rounds_half_up():\n    assert apply_discount(Decimal(\"10.05\"), 10) == Decimal(\"9.05\")\n\n\ndef test_apply_discount_rounds_half_up_on_exact_half():\n    assert apply_discount(Decimal(\"0.005\"), 0) == Decimal(\"0.01\")\n\n\ndef test_low_stock_is_strictly_below_threshold():\n    items = [{\"name\": \"pen\", \"qty\": 5}, {\"name\": \"ink\", \"qty\": 4}]\n    assert low_stock(items, threshold=5) == [\"ink\"]\n\n\ndef test_low_stock_sorted_case_insensitively():\n    items = [\n        {\"name\": \"Zed\", \"qty\": 1},\n        {\"name\": \"apple\", \"qty\": 2},\n        {\"name\": \"Mango\", \"qty\": 3},\n    ]\n    assert low_stock(items) == [\"
+{"file_path": "/workspace/tests/test_regressions.py", "content": "\"\"\"Regression tests for bugs fixed in the inventory package.\"\"\"\nfrom decimal import Decimal\n\nfrom inventory.export import to_csv_row\nfrom inventory.pricing import apply_discount, parse_price\nfrom inventory.report import low_stock\n\n\ndef test_parse_price_thousands_separator():\n    assert parse_price(\"$1,299.50\") == Decimal(\"1299.50\")\n\n\ndef test_parse_price_accounting_parentheses():\n    assert parse_price(\"(12.00)\") == Decimal(\"-12.00\")\n\n\ndef test_parse_price_parentheses_with_currency_and_separator():\n    assert parse_price(\"($1,299.50)\") == Decimal(\"-1299.50\")\n\n\ndef test_parse_price_whitespace_and_plain():\n    assert parse_price(\"  12 \") == Decimal(\"12\")\n    assert parse_price(\"1299.5\") == Decimal(\"1299.5\")\n\n\ndef test_apply_discount_rounds_half_up():\n    assert apply_discount(Decimal(\"10.05\"), 10) == Decimal(\"9.05\")\n    assert apply_discount(Decimal(\"1.005\"), 0) == Decimal(\"1.01\")\n\n\ndef test_low_stock_is_strictly_below_threshold():\n    assert low_stock([{\"name\": \"pen\", \"qty\": 5}]) == []\n    assert low_stock([{\"name\": \"pen\", \"qty\": 4}]) == [\"pen\"]\n\n\ndef test_low_stock_sorted_case_insensitively():\n    items = [{\"name\": \"Zebra\", \"qty\": 1}, {\"name\": \"apple\", \"qty\": 2}]\n    assert low_stock(items) == [\"apple\", \"Zebra\"]\n\n\ndef test_to_csv_row_quotes_comma():\n    assert to_csv_row({\"name\": \"a,b\", \"price\": \"2.5\
 
 ### Tool call: edit_file
-{"file_path": "/workspace/CHANGELOG.md", "old_string": "## Unreleased\n", "new_string": "## Unreleased\n- Fix `parse_price` to handle thousands separators and accounting-style parentheses for negative amounts.\n- Fix `apply_discount` to round half up instead of the default banker's rounding.\n- Fix `low_stock` to use a strict \"below threshold\" comparison and sort names case-insensitively.\n- Fix `to_csv_row` to apply RFC 4180 quoting for names containing commas or double quotes.\n"}
+{"file_path": "/workspace/CHANGELOG.md", "old_string": "## Unreleased\n", "new_string": "## Unreleased\n- Fix `parse_price` to handle thousands separators and accounting-style parentheses for negatives.\n- Fix `apply_discount` to round half up instead of the default half-even.\n- Fix `low_stock` to use a strict \"below threshold\" comparison and sort names case-insensitively.\n- Fix `to_csv_row` to apply RFC 4180 quoting to names containing commas or double quotes.\n"}
 
 ### Tool result
 Updated file /workspace/tests/test_regressions.py
@@ -464,87 +506,66 @@ Successfully replaced 1 instance(s) of the string in '/workspace/CHANGELOG.md'
 {"command": "cd workspace && python -m pytest tests -q 2>&1 | tail -20"}
 
 ### Tool result
-.................                                                        [100%]
-17 passed in 0.02s
+................                                                         [100%]
+16 passed in 0.02s
 
 [Command succeeded with exit code 0]
 
 ### Assistant
-All 17 tests pass (6 original + 11 regression). Let me do a final verification of the full state.
+All 16 tests pass. Let me do a final verification of the complete state.
 
-### Tool call: read_file
-{"file_path": "/workspace/inventory/pricing.py"}
-
-### Tool call: read_file
-{"file_path": "/workspace/CHANGELOG.md"}
+### Tool call: execute
+{"command": "cd workspace && python -m pytest tests -q 2>&1 | tail -3 && echo \"--- CHANGELOG ---\" && cat CHANGELOG.md && echo \"--- files ---\" && ls tests inventory"}
 
 ### Tool result
-@@ lines 1-31 of 31 @@
-"""Price utilities for the inventory package."""
-from decimal import ROUND_HALF_UP, Decimal
-
-_CENTS = Decimal("0.01")
-
-
-def parse_price(text: str) -> Decimal:
-    """Convert a price string to a Decimal.
-
-    Supported formats:
-      "$1,299.50" -> Decimal("1299.50")
-      "  12 "     -> Decimal("12")
-      "1299.5"    -> Decimal("1299.5")
-      "(12.00)"   -> Decimal("-12.00")   # accounting style: parentheses mean negative
-    """
-    cleaned = text.strip().replace("$", "").replace(",", "")
-    negative = cleaned.startswith("(") and cleaned.endswith(")")
-    if negative:
-        cleaned = cleaned[1:-1].strip()
-    value = Decimal(cleaned)
-    return -value if negative else value
-
-
-def apply_discount(price: Decimal, percent: float) -> Decimal:
-    """Return `price` after a percentage discount.
-
-    The result is a Decimal rounded to 2 decimal places using the
-    commercial rule "round half up" (0.005 -> 0.01).
-    """
-    discounted = price * (100 - percent) / 100
-    return discounted.quantize(_CENTS, rounding=ROUND_HALF_UP)
-
-### Tool result
-@@ lines 1-10 of 10 @@
+................                                                         [100%]
+16 passed in 0.02s
+--- CHANGELOG ---
 # Changelog
 
 ## Unreleased
-- Fix `parse_price` to handle thousands separators and accounting-style parentheses for negative amounts.
-- Fix `apply_discount` to round half up instead of the default banker's rounding.
+- Fix `parse_price` to handle thousands separators and accounting-style parentheses for negatives.
+- Fix `apply_discount` to round half up instead of the default half-even.
 - Fix `low_stock` to use a strict "below threshold" comparison and sort names case-insensitively.
-- Fix `to_csv_row` to apply RFC 4180 quoting for names containing commas or double quotes.
+- Fix `to_csv_row` to apply RFC 4180 quoting to names containing commas or double quotes.
 
 ## 0.3.1
 - initial import
+--- files ---
+inventory:
+__init__.py
+__pycache__
+export.py
+pricing.py
+report.py
+
+tests:
+__pycache__
+test_regressions.py
+test_report.py
+
+[Command succeeded with exit code 0]
 
 ### Assistant
-All done. The full suite passes (17 tests) and every function now matches its docstring.
+All done. The full suite passes (16 tests, 0 failures).
 
 ## Summary
 
 I fixed four bugs in the `inventory` package, each a mismatch between the code and its docstring (the spec):
 
 **`inventory/pricing.py`**
-- `parse_price`: it only stripped `$` and whitespace, so `"$1,299.50"` raised `InvalidOperation` and `"(12.00)"` was not treated as negative. It now removes thousands separators and handles accounting-style parentheses as a negative sign.
-- `apply_discount`: it used `Decimal.quantize`'s default `ROUND_HALF_EVEN` (banker's rounding), giving `9.04` for `10.05` at 10%. It now uses `ROUND_HALF_UP` as the docstring requires.
+- `parse_price`: it only stripped `$` and whitespace, so `"$1,299.50"` raised `InvalidOperation` and accounting-style negatives like `"(12.00)"` were unsupported. It now also removes thousands separators and treats surrounding parentheses as a negative sign.
+- `apply_discount`: `Decimal.quantize` defaults to `ROUND_HALF_EVEN`, contradicting the documented "round half up" rule (`10.05` at 10% gave `9.04` instead of `9.05`). It now passes `rounding=ROUND_HALF_UP` explicitly.
 
 **`inventory/report.py`**
-- `low_stock`: used `<=` instead of the documented strict "below threshold", and returned items in input order rather than sorted case-insensitively. Now uses `<` and `sorted(..., key=str.lower)`.
+- `low_stock`: used `<=` though the docstring says "strictly below", and never sorted despite the documented case-insensitive alphabetical order. Now uses `<` and `sorted(..., key=str.lower)`.
 
 **`inventory/export.py`**
-- `to_csv_row`: ignored the documented RFC 4180 quoting. Names containing a comma or double quote are now wrapped in double quotes with inner quotes doubled.
+- `to_csv_row`: the docstring requires RFC 4180 quoting, but names were emitted raw. Names containing a comma or double quote are now wrapped in quotes with inner quotes doubled.
 
-**Convention/artifact work**
-- Added type annotations to all parameters and return values of every public function.
-- Added `tests/test_regressions.py` with one test per fixed bug (11 tests).
-- Added a bullet per fix under the `## Unreleased` heading in `CHANGELOG.md`.
+**Conventions / artifacts**
+- Added type annotations to every public function parameter and return value.
+- Added `tests/test_regressions.py` with one test per fixed bug (10 tests).
+- Added an `## Unreleased` changelog entry with one bullet per fix.
 
-I did not modify any existing file in `tests/`. Final result: `17 passed`.
+I did not modify the existing `tests/test_report.py`.

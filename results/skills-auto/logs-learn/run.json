@@ -2,18 +2,18 @@
   "task": "logs-learn",
   "condition": "skills-auto",
   "role": "learn",
-  "timestamp": "2026-10-06T17:00:37.652571+00:00",
+  "timestamp": "2026-10-06T17:09:10.799060+00:00",
   "error": "GraphRecursionError: Recursion limit of 60 reached without hitting a stop condition. You can increase the limit by setting the `recursion_limit` config key.\nFor troubleshooting, visit: https://docs.langchain.com/oss/python/langgraph/errors/GRAPH_RECURSION_LIMIT",
   "tokens": {
-    "input": 443069,
-    "output": 3050,
-    "total": 446119
+    "input": 274474,
+    "output": 1852,
+    "total": 276326
   },
-  "tool_calls": 35,
+  "tool_calls": 32,
   "subagent_calls": 0,
-  "skills_read": 4,
+  "skills_read": 3,
   "skills_modified": false,
-  "seconds": 37.7,
+  "seconds": 28.9,
   "final_message": "",
   "skills_sha256": "1585006c72e0d4777b75f7e1aff62672a7361d46f410bd704a312c88dcfe07b3",
   "timeout_seconds": 180.0,
@@ -24,47 +24,47 @@
     {
       "name": "valid_structure",
       "passed": false,
-      "detail": "FileNotFoundError: [Errno 2] No such file or directory: '/tmp/lab-pz7gmzhi/workspace/errors.json'"
+      "detail": "FileNotFoundError: [Errno 2] No such file or directory: '/tmp/lab-89klerfm/workspace/errors.json'"
     },
     {
       "name": "entry_count",
       "passed": false,
-      "detail": "FileNotFoundError: [Errno 2] No such file or directory: '/tmp/lab-pz7gmzhi/workspace/errors.json'"
+      "detail": "FileNotFoundError: [Errno 2] No such file or directory: '/tmp/lab-89klerfm/workspace/errors.json'"
     },
     {
       "name": "timestamps_utc",
       "passed": false,
-      "detail": "FileNotFoundError: [Errno 2] No such file or directory: '/tmp/lab-pz7gmzhi/workspace/errors.json'"
+      "detail": "FileNotFoundError: [Errno 2] No such file or directory: '/tmp/lab-89klerfm/workspace/errors.json'"
     },
     {
       "name": "exception_fields",
       "passed": false,
-      "detail": "FileNotFoundError: [Errno 2] No such file or directory: '/tmp/lab-pz7gmzhi/workspace/errors.json'"
+      "detail": "FileNotFoundError: [Errno 2] No such file or directory: '/tmp/lab-89klerfm/workspace/errors.json'"
     },
     {
       "name": "repeat_counts",
       "passed": false,
-      "detail": "FileNotFoundError: [Errno 2] No such file or directory: '/tmp/lab-pz7gmzhi/workspace/errors.json'"
+      "detail": "FileNotFoundError: [Errno 2] No such file or directory: '/tmp/lab-89klerfm/workspace/errors.json'"
     },
     {
       "name": "counts_by_service",
       "passed": false,
-      "detail": "FileNotFoundError: [Errno 2] No such file or directory: '/tmp/lab-pz7gmzhi/workspace/errors.json'"
+      "detail": "FileNotFoundError: [Errno 2] No such file or directory: '/tmp/lab-89klerfm/workspace/errors.json'"
     },
     {
       "name": "rule_service_names",
       "passed": false,
-      "detail": "FileNotFoundError: [Errno 2] No such file or directory: '/tmp/lab-pz7gmzhi/workspace/errors.json'"
+      "detail": "FileNotFoundError: [Errno 2] No such file or directory: '/tmp/lab-89klerfm/workspace/errors.json'"
     },
     {
       "name": "rule_sorted_errors",
       "passed": false,
-      "detail": "FileNotFoundError: [Errno 2] No such file or directory: '/tmp/lab-pz7gmzhi/workspace/errors.json'"
+      "detail": "FileNotFoundError: [Errno 2] No such file or directory: '/tmp/lab-89klerfm/workspace/errors.json'"
     },
     {
       "name": "rule_schema_header",
       "passed": false,
-      "detail": "FileNotFoundError: [Errno 2] No such file or directory: '/tmp/lab-pz7gmzhi/workspace/errors.json'"
+      "detail": "FileNotFoundError: [Errno 2] No such file or directory: '/tmp/lab-89klerfm/workspace/errors.json'"
     }
   ]
 }

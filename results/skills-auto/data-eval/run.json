@@ -1,0 +1,70 @@
+{
+  "task": "data-eval",
+  "condition": "skills-auto",
+  "role": "eval",
+  "timestamp": "2026-10-06T17:07:18.523169+00:00",
+  "error": "GraphRecursionError: Recursion limit of 60 reached without hitting a stop condition. You can increase the limit by setting the `recursion_limit` config key.\nFor troubleshooting, visit: https://docs.langchain.com/oss/python/langgraph/errors/GRAPH_RECURSION_LIMIT",
+  "tokens": {
+    "input": 695104,
+    "output": 2509,
+    "total": 697613
+  },
+  "tool_calls": 34,
+  "subagent_calls": 0,
+  "skills_read": 3,
+  "skills_modified": false,
+  "seconds": 34.6,
+  "final_message": "",
+  "skills_sha256": "1585006c72e0d4777b75f7e1aff62672a7361d46f410bd704a312c88dcfe07b3",
+  "timeout_seconds": 180.0,
+  "score": 0.0,
+  "passed": 0,
+  "total": 9,
+  "checks": [
+    {
+      "name": "march_revenue_utc",
+      "passed": false,
+      "detail": ""
+    },
+    {
+      "name": "march_orders_utc",
+      "passed": false,
+      "detail": ""
+    },
+    {
+      "name": "top_category",
+      "passed": false,
+      "detail": ""
+    },
+    {
+      "name": "missing_total_orders",
+      "passed": false,
+      "detail": ""
+    },
+    {
+      "name": "duplicate_events_removed",
+      "passed": false,
+      "detail": ""
+    },
+    {
+      "name": "rule_money_in_cents",
+      "passed": false,
+      "detail": ""
+    },
+    {
+      "name": "rule_meta_block",
+      "passed": false,
+      "detail": ""
+    },
+    {
+      "name": "rule_clean_csv",
+      "passed": false,
+      "detail": ""
+    },
+    {
+      "name": "rule_sorted_keys_format",
+      "passed": false,
+      "detail": ""
+    }
+  ]
+}

@@ -166,19 +166,13 @@ S-1055,04/03/2024
 ### Tool result
 ['/skills/fix-failing-tests-incrementally/', '/skills/locate-project-files-before-editing/', '/skills/produce-required-output-artifacts/']
 
-### Tool call: ls
-{"path": "/skills/produce-required-output-artifacts"}
-
 ### Tool call: execute
-{"command": "ls -la /workspace; ls -la /; python3 -c \"import sys; print(sys.version)\""}
-
-### Tool result
-['/skills/produce-required-output-artifacts/SKILL.md']
+{"command": "ls -la /workspace; ls -la /; find / -maxdepth 3 -name \"*.md\" -not -path \"*/skills/*\" 2>/dev/null"}
 
 ### Tool result
 total 72
-drwxr-xr-x   1 root root 4096 Oct  6 16:54 .
-drwxr-xr-x   1 root root 4096 Oct  6 16:54 ..
+drwxr-xr-x   1 root root 4096 Oct  6 17:01 .
+drwxr-xr-x   1 root root 4096 Oct  6 17:01 ..
 -rwxr-xr-x   1 root root    0 Oct  6 16:48 .dockerenv
 drwxr-xr-x   1 root root 4096 Sep 28 08:36 app
 lrwxrwxrwx   1 root root    7 Jul 17 17:05 bin -> usr/bin
@@ -198,22 +192,44 @@ drwxr-xr-x   1 root root 4096 Oct  6 05:35 run
 lrwxrwxrwx   1 root root    8 Jul 17 17:05 sbin -> usr/sbin
 drwxr-xr-x   1 root root 4096 Oct  6 16:48 srv
 dr-xr-xr-x  12 root root    0 Oct  6 16:36 sys
-drwxrwxrwt   1 root root 4096 Oct  6 17:00 tmp
+drwxrwxrwt   1 root root 4096 Oct  6 17:07 tmp
 drwxr-xr-x   1 root root 4096 Sep 18 00:00 usr
 drwxr-xr-x   1 root root 4096 Sep 18 00:00 var
-3.11.16 (main, Sep 19 2026, 01:04:43) [GCC 14.2.0]
+/app/exercises.md
+/app/LAB_GUIDE.md
+/app/SUBMISSION.md
+/app/screenshots/README.md
+/app/.pytest_cache/README.md
+/app/README.md
+/app/RULES.md
+/app/RUBRIC.md
+/app/CHECKPOINTS.md
+/app/DEPLOYMENT.md
 
 [stderr] ls: cannot access '/workspace': No such file or directory
-[Command succeeded with exit code 0]
 
-### Tool call: execute
-{"command": "ls -la /app /lab /home 2>&1 | head -60"}
+Exit code: 1
+[Command failed with exit c
+
+### Tool call: read_file
+{"file_path": "/app/RULES.md", "limit": 1000}
+
+### Tool call: read_file
+{"file_path": "/app/README.md", "limit": 1000}
 
 ### Tool result
-/app:
+Error: File '/app/RULES.md' not found
+
+### Tool result
+Error: File '/app/README.md' not found
+
+### Tool call: execute
+{"command": "ls -la /app; ls -la /lab; ls -la /home"}
+
+### Tool result
 total 156
 drwxr-xr-x 1 root root  4096 Sep 28 08:36 .
-drwxr-xr-x 1 root root  4096 Oct  6 16:54 ..
+drwxr-xr-x 1 root root  4096 Oct  6 17:01 ..
 -rwxr-xr-x 1 root root   272 Sep 28 07:27 .dockerignore
 -rwxr-xr-x 1 root root  2540 Sep 28 07:27 .env
 -rwxr-xr-x 1 root root  2540 Sep 28 07:27 .env.example
@@ -238,36 +254,11 @@ drwxr-xr-x 2 root root  4096 Sep 28 07:27 nginx
 drwxr-xr-x 2 root root  4096 Sep 28 07:27 screenshots
 drwxr-xr-x 3 root root  4096 Sep 28 07:40 tests
 drwxr-xr-x 3 root root  4096 Sep 28 07:40 utils
-
-/home:
+total 8
+drwxr-xr-x 2 root root 4096 Oct  6 05:33 .
+drwxr-xr-x 1 root root 4096 Oct  6 17:01 ..
 total 12
-drwxr-xr-x 1 root    root    4096 Sep 28 08:49 .
-drwxr-xr-x 1 root    root    4096 Oct  6 16:54 ..
-drwx--
-
-### Tool call: grep
-{"pattern": "Acme", "path": "/app", "output_mode": "files_with_matches"}
-
-### Tool call: grep
-{"pattern": "reporting convention", "path": "/app", "output_mode": "files_with_matches"}
-
-### Tool result
-No matches found
-
-### Tool result
-No matches found
-
-### Tool call: grep
-{"output_mode": "files_with_matches", "path": "/app", "pattern": "answer.json"}
-
-### Tool call: grep
-{"output_mode": "files_with_matches", "path": "/app", "pattern": "sales.csv"}
-
-### Tool result
-No matches found
-
-### Tool result
-No matches found
+drwxr-xr-x 1 root    roo
 
 ### Tool call: read_file
 {"file_path": "/app/RULES.md", "limit": 1000}
@@ -282,57 +273,7 @@ Error: File '/app/RULES.md' not found
 Error: File '/app/SUBMISSION.md' not found
 
 ### Tool call: execute
-{"command": "ls -la /app; echo ---; ls -la /app/app /app/tests /app/utils"}
-
-### Tool result
-total 156
-drwxr-xr-x 1 root root  4096 Sep 28 08:36 .
-drwxr-xr-x 1 root root  4096 Oct  6 16:54 ..
--rwxr-xr-x 1 root root   272 Sep 28 07:27 .dockerignore
--rwxr-xr-x 1 root root  2540 Sep 28 07:27 .env
--rwxr-xr-x 1 root root  2540 Sep 28 07:27 .env.example
-drwxr-xr-x 3 root root  4096 Sep 28 07:40 .pytest_cache
-drwxr-xr-x 5 root root  4096 Sep 28 07:30 .venv
--rwxr-xr-x 1 root root  4480 Sep 28 07:27 CHECKPOINTS.md
--rwxr-xr-x 1 root root  3272 Sep 28 07:27 DEPLOYMENT.md
--rwxr-xr-x 1 root root  2222 Sep 28 08:27 Dockerfile
--rwxr-xr-x 1 root root 35121 Sep 28 07:27 LAB_GUIDE.md
--rwxr-xr-x 1 root root 12872 Sep 28 07:27 README.md
--rwxr-xr-x 1 root root  3321 Sep 28 07:27 RUBRIC.md
--rwxr-xr-x 1 root root  2517 Sep 28 07:27 RULES.md
--rwxr-xr-x 1 root root  2381 Sep 28 07:27 SUBMISSION.md
-drwxr-xr-x 3 root root  4096 Sep 28 07:40 app
--rwxr-xr-x 1 root root  1836 Sep 28 08:35 docker-compose.yml
--rwxr-xr-x 1 root root  4023 Sep 28 07:27 exercises.md
--rwxr-xr-x 1 root root  7262 Sep 28 07:27 grade.py
-drwxr-xr-x 2 root root  4096 Sep 28 07:27 nginx
--rwxr-xr-x 1 root root   576 Sep 28 07:27 railway.toml
--rwxr-xr-x 1 root root   820 Sep 28 07:27 render.yaml
--rwxr-xr-x 1 root root   202 Sep 28 07:27 requirements.txt
-drwxr-xr-x 2 root root  4096 Sep 28 07:27 screenshots
-drwxr-xr-x 3 root root  4096 Sep 28 07:40 tests
-drwxr-xr-x 3 root root  4096 Sep 28 07:40 utils
----
-/app/app:
-total 48
-drwxr-xr-x 3 root root 4096 Sep 28 07:40 .
-drwxr-xr-x 1 root root 4096 Sep 28 08:36 ..
--rwxr-xr-x 1 root 
-
-### Tool call: read_file
-{"file_path": "/app/RULES.md", "limit": 1000}
-
-### Tool call: read_file
-{"file_path": "/app/SUBMISSION.md", "limit": 1000}
-
-### Tool result
-Error: File '/app/RULES.md' not found
-
-### Tool result
-Error: File '/app/SUBMISSION.md' not found
-
-### Tool call: execute
-{"command": "cat /app/RULES.md; echo =====; cat /app/SUBMISSION.md"}
+{"command": "cat /app/RULES.md; echo \"=====SUBMISSION=====\"; cat /app/SUBMISSION.md"}
 
 ### Tool result
 # Quy Định Làm Bài
@@ -427,7 +368,7 @@ K4-L3A-DAY12-<HoVaTen>-<MSSV>-<TenBai>
 
 
 ### Tool call: execute
-{"command": "cat /app/CHECKPOINTS.md; echo =====; cat /app/RUBRIC.md"}
+{"command": "cat /app/CHECKPOINTS.md; echo \"=====RUBRIC=====\"; cat /app/RUBRIC.md"}
 
 ### Tool result
 # Checkpoints
@@ -470,69 +411,66 @@ endpoint `/health` độc lập với dependency ngoài.
 không nên gọi Redis.
 
 ### Tool call: execute
-{"command": "cat /app/exercises.md; echo =====; cat /app/DEPLOYMENT.md"}
+{"command": "cat /app/DEPLOYMENT.md; echo \"=====EXERCISES=====\"; cat /app/exercises.md"}
 
 ### Tool result
-# Phiếu Phản Ánh — K4 Level 3A, Ngày 12
+# Thông Tin Deploy — Checkpoint 5
 
-> **Bài làm cá nhân.** Trả lời bằng lời của chính bạn, dựa trên những gì bạn
-> quan sát được khi chạy code — không sao chép đáp án của người khác.
+> Điền file này sau khi deploy xong. `pytest tests/test_cp5.py` đọc file này
+> để tìm địa chỉ service của bạn và gọi thử.
 >
-> Cách trả lời: thay dòng `> *Câu trả lời của bạn*` bằng câu trả lời.
-> `grade.py` đếm số câu đã trả lời (15 điểm cho 10 câu).
->
-> Họ và tên: ..........................  Mã học viên: ..........................
+> **Chỉ ghi TÊN biến môi trường, tuyệt đối không dán giá trị API key vào đây.**
+> Repo này công khai — dán khóa vào là mất khóa.
 
----
+## Thông Tin Học Viên
 
-### Câu 1 — Fail fast (CP1)
+| Mục | Nội dung |
+|-----|----------|
+| Họ và tên | (điền họ tên) |
+| Mã học viên | (điền mã học viên) |
+| Repo | (điền link repo K4-L3A-DAY12-HoVaTen-MSSV-CloudServicesAndDeployment) |
 
-Trong `Settings`, `agent_api_key` không có giá trị mặc định nên app chết ngay
-khi khởi động nếu thiếu biến môi trường. Hãy mô tả một tình huống cụ thể mà
-việc "chết sớm" này cứu bạn, so với việc để mặc định `"changeme"`.
+## Service
 
-> *Câu trả lời của bạn*
+| Mục | Nội dung |
+|-----|----------|
+| Public URL | https://TODO-thay-bang-url-that.up.railway.app |
+| Platform | Railway / Render / Cloud Run — (điền platform bạn dùng) |
+| Ngày deploy | (điền ngày) |
 
----
+## Biến Môi Trường Đã Set Trên Cloud
 
-### Câu 2 — Log cho máy đọc (CP1)
+Ghi tên biến và **nguồn giá trị**, không ghi giá trị:
 
-Chạy service và gọi `/ask` vài lần. Dán một dòng log JSON bạn thu được, rồi
-nêu **hai** việc bạn làm được với dòng log đó mà `print("đã trả lời xong")`
-không làm được.
+| Biến | Đã set | Ghi chú |
+|------|--------|---------|
+| `PORT` | ✅ | platform tự gán |
+| `AGENT_API_KEY` | ✅ | đặt trong dashboard, không nằm trong repo |
+| `REDIS_URL` | ✅ | (điền: Redis add-on của platform / Upstash / ...) |
+| `RATE_LIMIT_PER_MINUTE` | ✅ | 10 |
+| `MONTHLY_BUDGET_USD` | ✅ | 10.0 |
+| `LOG_LEVEL` | ✅ | INFO |
 
-> *Câu trả lời của bạn*
+## Lệnh Kiểm Tra
 
----
-
-### Câu 3 — Kích thước image (CP2)
-
-Build cả hai phiên bản và ghi lại số đo thật:
+Thay `<URL>` bằng Public URL ở trên:
 
 ```bash
-docker build -f <Dockerfile-1-stage> -t agent:single .
-docker build -t agent:multi .
-docker images | grep agent
-```
+# 1. Liveness — mong đợi 200 {"status":"ok"}
+curl -i <URL>/health
 
-| Bản | Dung lượng |
-|-----|-----------|
-| 1 stage (bản đầu) | ... MB |
-| Multi-stage | ... MB |
+# 2. Readiness — mong đợi 200 {"status":"ready"} (đã nối được Redis)
+curl -i <URL>/ready
 
-Giải thích: phần dung lượng chênh lệch đó là những gì?
+# 3. Không có API key — mong đợi 401
+curl -i -X POST <URL>/ask \
+  -H "Content-Type: application/json" \
+  -d '{"question":"Hello"}'
 
-> *Câu trả lời của bạn*
-
----
-
-### Câu 4 — Thứ tự lệnh trong Dockerfile (CP2)
-
-Sửa một ký tự trong `app/main.py` rồi build lại. Với Dockerfile của bạn, những
-layer nào được dùng lại từ cache, layer nào phải chạy lại? N
+# 4. Có
 
 ### Tool call: execute
-{"command": "cat /app/LAB_GUIDE.md | head -200"}
+{"command": "cat /app/LAB_GUIDE.md | head -400"}
 
 ### Tool result
 # Hướng Dẫn Lab — K4 Level 3A, Ngày 12: Hạ Tầng Cloud & Deployment
@@ -574,99 +512,57 @@ python3 -m venv .venv
 source .venv/bin/activate          # Windows: .venv\Script
 
 ### Tool call: execute
-{"command": "grep -n -i \"acme\\|convention\\|reporting\\|answer.json\\|sales\" /app/LAB_GUIDE.md /app/grade.py /app/tests/*.py /app/app/*.py /app/utils/*.py /app/*.md /app/*.yml /app/*.toml /app/*.yaml 2>/dev/null | head -50"}
+{"command": "sed -n 400,900p /app/LAB_GUIDE.md"}
 
 ### Tool result
-<no output>
-[Command succeeded with exit code 0]
+Một instance không đủ, và instance nào cũng có thể chết bất cứ lúc nào — cloud
+restart container để vá lỗi, dời máy, hoặc vì bạn deploy bản mới. Hệ thống phải
+chịu được điều đó mà user không nhận ra.
+
+### Việc cần làm
+
+#### 4.1 — `app/store.py`: state ra khỏi process
+
+```python
+#  Sai — mỗi container một dict riêng
+conversation_history = {}
+
+#  Đúng — mọi container cùng nhìn một Redis
+self.client.rpush(f"history:{user_id}", ...)
+```
+
+Với 3 instance sau load balancer, câu 1 của user vào container A, câu 2 vào
+container B. Nếu lịch sử nằm trong RAM của A thì B không biết gì — agent "mất
+trí nhớ" ngẫu nhiên. Đó là lý do stateless không phải tùy chọn.
+
+Hai chi tiết bắt buộc:
+- `ltrim` giữ tối đa `HISTORY_MAX_MESSAGES` message gần nhất — prompt dài vô hạn
+  = tiền token vô hạn
+- `expire` để hội thoại cũ tự hết hạn — không thì Redis đầy dần đến khi sập
+
+`ping()` phải nuốt mọi exception và trả `False`. Nó dùng cho `/ready`; một
+exception thoát ra sẽ biến readiness probe thành lỗi 500.
+
+#### 4.2 — `/ready`
+
+```
+Redis sống  →  200 {"status": "ready", "redis": true}
+Redis chết  →  503 {"status": "not ready", "redis": false}
+Đang tắt    →  503 {"status": "shutting_down"}
+```
+
+Khác `/health` ở đúng một điểm cốt lõi:
+
+| | `/health` (liveness) | `/ready` (readiness) |
+|---|---|---|
+| Câu hỏi | Process còn sống không? | Nhận traffic được chưa? |
+| Kiểm tra dependency | **Không** | **Có** |
+| Trả 503 thì sao | Orchestrator **restart** container | LB **ngừng gửi** request, không restart |
+
+Gộ
 
 ### Tool call: execute
-{"command": "ls -la /app/.venv; ls -la /app/.venv/*; cat /app/.env.example"}
-
-### Tool result
-total 24
-drwxr-xr-x 5 root root 4096 Sep 28 07:30 .
-drwxr-xr-x 1 root root 4096 Sep 28 08:36 ..
-drwxr-xr-x 2 root root 4096 Sep 28 07:30 Include
-drwxr-xr-x 3 root root 4096 Sep 28 07:30 Lib
-drwxr-xr-x 2 root root 4096 Sep 28 07:32 Scripts
--rwxr-xr-x 1 root root  374 Sep 28 07:30 pyvenv.cfg
--rwxr-xr-x 1 root root  374 Sep 28 07:30 /app/.venv/pyvenv.cfg
-
-/app/.venv/Include:
-total 8
-drwxr-xr-x 2 root root 4096 Sep 28 07:30 .
-drwxr-xr-x 5 root root 4096 Sep 28 07:30 ..
-
-/app/.venv/Lib:
-total 12
-drwxr-xr-x  3 root root 4096 Sep 28 07:30 .
-drwxr-xr-x  5 root root 4096 Sep 28 07:30 ..
-drwxr-xr-x 68 root root 4096 Sep 28 07:32 site-packages
-
-/app/.venv/Scripts:
-total 1980
-drwxr-xr-x 2 root root   4096 Sep 28 07:32 .
-drwxr-xr-x 5 root root   4096 Sep 28 07:30 ..
--rwxr-xr-x 1 root root  27975 Sep 28 07:31 Activate.ps1
--rwxr-xr-x 1 root root   2270 Sep 28 07:31 activate
--rwxr-xr-x 1 root root   1047 Sep 28 07:31 activate.bat
--rwxr-xr-x 1 root root    393 Sep 28 07:31 deactivate.bat
--rwxr-xr-x 1 root root 108437 Sep 28 07:32 dotenv.exe
--rwxr-xr-x 1 root root 108435 Sep 28 07:32 fastapi.exe
--rwxr-xr-x 1 root root 108429 Sep 28 07:32 httpx.exe
--rwxr-xr-x 1 root root 108432 Sep 28 07:32 idna.exe
--rwxr-xr-x 1 root root 108446 Sep 28 07:31 pip.exe
--rwxr-xr-x 1 root root 108446 Sep 28 07:31 pip3.12.exe
--rwxr-xr-x 1 root root 108446 Sep 28 07:31 pip3.exe
--rwxr-xr-x 1 root root 108456 Sep 28 07:32 py.test.exe
--rwxr-xr-x 1 root root 108440 Sep 28 07:32 pygmentize.exe
--rwxr-xr-x 1 root root 108456
-
-### Tool call: execute
-{"command": "cat /app/.env; echo ====; cat /app/.dockerignore; echo ====; cat /app/Dockerfile"}
-
-### Tool result
-# ─────────────────────────────────────────────────────────────
-# Copy file này thành .env rồi sửa giá trị:  cp .env.example .env
-# TUYỆT ĐỐI KHÔNG commit file .env (đã nằm trong .gitignore)
-# ─────────────────────────────────────────────────────────────
-
-# Cổng HTTP. Trên Railway/Render/Cloud Run, platform tự set biến PORT.
-PORT=8000
-
-# Khóa API bảo vệ endpoint /ask. BẮT BUỘC — app không chạy nếu thiếu.
-# Sinh khóa ngẫu nhiên:  python -c "import secrets; print(secrets.token_urlsafe(32))"
-AGENT_API_KEY=doi-thanh-khoa-cua-rieng-ban
-
-# Redis dùng để lưu state (lịch sử hội thoại, rate limit, chi phí).
-#   redis://localhost:6379/0   → Redis chạy bằng Docker ở máy bạn
-#   fake://                    → Redis giả trong RAM, dùng khi chưa cài Docker
-REDIS_URL=redis://localhost:6379/0
-
-# Giới hạn số request mỗi phút cho mỗi user
-RATE_LIMIT_PER_MINUTE=10
-
-# Ngân sách tối đa mỗi user mỗi tháng (USD)
-MONTHLY_BUDGET_USD=10.0
-
-# DEBUG | INFO | WARNING | ERROR
-LOG_LEVEL=INFO
-
-# ─────────────────────────────────────────────────────────────
-# Chỉ dùng cho CHECKPOINT 5 (kiểm tra bản deploy), không phải config của app
-# ─────────────────────────────────────────────────────────────
-
-# Đặt true nếu bạn KHÔNG deploy được lên cloud và dùng phương án dự phòng
-# (chạy docker compose ở máy + nộp screenshot). CP5 khi đó tối đa 60% điểm.
-LOCAL_FALLBACK=false
-
-# Khóa API của CHÍNH SERVICE BẠN VỪA DEPLOY — KHÔNG phải token của
-# Railway/Render/GCP. Đây là giá trị AGENT_API_KEY bạn đã set trong dashboard
-# 
-
-### Tool call: execute
-{"command": "cat /app/grade.py"}
+{"command": "cat /app/grade.py; echo \"=====TESTS=====\"; ls -la /app/tests /app/app /app/utils"}
 
 ### Tool result
 #!/usr/bin/env python3
@@ -716,7 +612,59 @@ TOTAL_QUESTIONS = 10
 FALLBACK_MAX_
 
 ### Tool call: execute
-{"command": "cat /app/tests/conftest.py"}
+{"command": "cat /app/tests/test_cp5.py"}
+
+### Tool result
+"""CHECKPOINT 5 — Cloud Deployment: service chạy thật, có địa chỉ công khai.
+
+Chạy: pytest tests/test_cp5.py -v
+File cần sửa: DEPLOYMENT.md (điền URL thật sau khi deploy)
+
+Test này gọi vào service của bạn qua Internet nên cần kết nối mạng.
+
+Không deploy được lên cloud? Đặt ``LOCAL_FALLBACK=true`` trong .env rồi chạy
+``docker compose up`` — điểm CP5 khi đó tối đa 60% (xem grade.py).
+"""
+
+from __future__ import annotations
+
+import os
+import re
+
+import httpx
+import pytest
+
+TIMEOUT = 20.0
+LOCAL_URL = os.getenv("LOCAL_BASE_URL", "http://localhost:8000")
+PLACEHOLDER_HINTS = ("todo", "your-app", "example.com", "abcxyz", "dien-vao", "<")
+
+# Cloud free tier hay "ngủ đông" — request đầu tiên có thể mất vài chục giây
+FIRST_CALL_TIMEOUT = 60.0
+
+
+def fallback_mode() -> bool:
+    return os.getenv("LOCAL_FALLBACK", "false").strip().lower() in ("1", "true", "yes")
+
+
+def call(method: str, url: str, timeout: float = TIMEOUT, **kwargs):
+    """Gọi HTTP và biến lỗi kết nối thành thông báo dễ hiểu thay vì traceback."""
+    try:
+        return httpx.request(method, url, timeout=timeout, **kwargs)
+    except httpx.HTTPError as err:
+        pytest.fail(
+            f"không gọi được {url}\n"
+            f"lý do: {type(err).__name__}: {err}\n"
+            "→ kiểm tra URL trong DEPLOYMENT.md, xem service còn sống không, "
+            "và mở log trên dashboard của platform."
+        )
+
+
+def read_deployment(repo_root) -> str:
+    path = repo_root / "DEPLOYMENT.md"
+    assert path.exists(), "thiếu file DE
+
+### Tool call: execute
+{"command": "cat /app/tests/conftest.py; echo \"=====CP1=====\"; cat /app/tests/test_cp1.py"}
 
 ### Tool result
 """Cấu hình chung cho toàn bộ checkpoint.
@@ -775,215 +723,112 @@ class StubStore:
     def ping(self) -> bo
 
 ### Tool call: execute
-{"command": "cat /app/tests/test_cp5.py"}
+{"command": "cat /app/tests/test_cp2.py; echo \"=====CP3=====\"; cat /app/tests/test_cp3.py"}
 
 ### Tool result
-"""CHECKPOINT 5 — Cloud Deployment: service chạy thật, có địa chỉ công khai.
+"""CHECKPOINT 2 — Docker: multi-stage build, bảo mật image, compose stack.
 
-Chạy: pytest tests/test_cp5.py -v
-File cần sửa: DEPLOYMENT.md (điền URL thật sau khi deploy)
+Chạy: pytest tests/test_cp2.py -v
+File cần sửa: Dockerfile, .dockerignore, docker-compose.yml
 
-Test này gọi vào service của bạn qua Internet nên cần kết nối mạng.
-
-Không deploy được lên cloud? Đặt ``LOCAL_FALLBACK=true`` trong .env rồi chạy
-``docker compose up`` — điểm CP5 khi đó tối đa 60% (xem grade.py).
-"""
-
-from __future__ import annotations
-
-import os
-import re
-
-import httpx
-import pytest
-
-TIMEOUT = 20.0
-LOCAL_URL = os.getenv("LOCAL_BASE_URL", "http://localhost:8000")
-PLACEHOLDER_HINTS = ("todo", "your-app", "example.com", "abcxyz", "dien-vao", "<")
-
-# Cloud free tier hay "ngủ đông" — request đầu tiên có thể mất vài chục giây
-FIRST_CALL_TIMEOUT = 60.0
-
-
-def fallback_mode() -> bool:
-    return os.getenv("LOCAL_FALLBACK", "false").strip().lower() in ("1", "true", "yes")
-
-
-def call(method: str, url: str, timeout: float = TIMEOUT, **kwargs):
-    """Gọi HTTP và biến lỗi kết nối thành thông báo dễ hiểu thay vì traceback."""
-    try:
-        return httpx.request(method, url, timeout=timeout, **kwargs)
-    except httpx.HTTPError as err:
-        pytest.fail(
-            f"không gọi được {url}\n"
-            f"lý do: {type(err).__name__}: {err}\n"
-            "→ kiểm tra URL trong DEPLOYMENT.md, xem service còn sống không, "
-            "và mở log trên dashboard của platform."
-        )
-
-
-def read_deployment(repo_root) -> str:
-    path = repo_root / "DEPLOYMENT.md"
-    assert path.exists(), "thiếu file DE
-
-### Tool call: execute
-{"command": "cat /app/tests/test_cp1.py; echo =====; cat /app/tests/test_cp2.py"}
-
-### Tool result
-"""CHECKPOINT 1 — 12-Factor Config, Health Check & Structured Logging.
-
-Chạy: pytest tests/test_cp1.py -v
-File cần sửa: app/config.py, app/logging_utils.py, app/main.py (/health)
-"""
-
-from __future__ import annotations
-
-import json
-import re
-
-import pytest
-from pydantic import ValidationError
-
-# Những chuỗi không bao giờ được xuất hiện trong code cấu hình
-FORBIDDEN_SECRETS = ["sk-", "secret-key-123", "password123", "AKIA"]
-
-
-class TestConfig:
-    def test_settings_co_du_cac_truong(self):
-        """Settings khai báo đủ 6 trường theo bảng trong app/config.py."""
-        from app.config import Settings
-
-        for field in (
-            "port",
-            "agent_api_key",
-            "redis_url",
-            "rate_limit_per_minute",
-            "monthly_budget_usd",
-            "log_level",
-        ):
-            assert field in Settings.model_fields, f"thiếu trường '{field}'"
-
-    def test_doc_gia_tri_tu_bien_moi_truong(self, monkeypatch):
-        """Đổi biến môi trường → cấu hình đổi theo, không cần sửa code."""
-        from app.config import Settings
-
-        monkeypatch.setenv("AGENT_API_KEY", "khoa-tu-env")
-        monkeypatch.setenv("PORT", "9123")
-        monkeypatch.setenv("RATE_LIMIT_PER_MINUTE", "42")
-        monkeypatch.setenv("MONTHLY_BUDGET_USD", "3.5")
-
-        settings = Settings(_env_file=None)
-        assert settings.agent_api_key == "khoa-tu-env"
-        assert settings.port == 9123
-        assert settings.rate_limit_per_minute == 42
-        assert settings.
-
-### Tool call: execute
-{"command": "cat /app/tests/test_cp3.py; echo =====; cat /app/tests/test_cp4.py"}
-
-### Tool result
-"""CHECKPOINT 3 — API Security: authentication, rate limiting, cost guard.
-
-Chạy: pytest tests/test_cp3.py -v
-File cần sửa: app/auth.py, app/rate_limiter.py, app/cost_guard.py, app/main.py (/ask)
-"""
-
-from __future__ import annotations
-
-import pytest
-from fastapi import HTTPException
-
-
-class TestAuthentication:
-    def test_khong_co_key_thi_401(self, client):
-        response = client.post("/ask", json={"question": "Xin chào"})
-        assert response.status_code == 401
-
-    def test_sai_key_thi_401(self, client):
-        response = client.post(
-            "/ask",
-            json={"question": "Xin chào"},
-            headers={"X-API-Key": "khoa-bia-dat"},
-        )
-        assert response.status_code == 401
-
-    def test_dung_key_thi_200(self, client, auth_headers):
-        response = client.post(
-            "/ask", json={"question": "Docker là gì?"}, headers=auth_headers
-        )
-        assert response.status_code == 200, response.text
-        assert response.json()["answer"]
-
-    def test_tra_ve_dung_user_id(self, client, api_key):
-        response = client.post(
-            "/ask",
-            json={"question": "Hi"},
-            headers={"X-API-Key": api_key, "X-User-Id": "sv-123"},
-        )
-        assert response.json()["user_id"] == "sv-123"
-
-    def test_khong_gui_user_id_thi_thanh_anonymous(self, client, api_key):
-        from app.auth import ANONYMOUS_USER
-
-        response = client.post(
-            "/ask", json={"question": "Hi"}, headers={"X-API-Key": api_k
-
-### Tool call: execute
-{"command": "cat /app/tests/test_bonus_cicd.py"}
-
-### Tool result
-"""BONUS — CI/CD với GitHub Actions (tối đa +10 điểm cộng).
-
-Chạy: pytest tests/test_bonus_cicd.py -v
-File cần tạo: .github/workflows/ci.yml  (bạn tự viết, lab không cho sẵn)
-
-Phần này KHÔNG bắt buộc. Làm xong 5 checkpoint chính rồi hãy đụng tới.
-
-Mục tiêu: mỗi lần bạn `git push`, GitHub tự chạy test, tự build image, và
-CHỈ khi mọi thứ xanh mới tự deploy. Không còn cảnh "quên chạy test trước khi
-deploy" hay "deploy từ máy của một bạn nào đó rồi không ai biết đã deploy gì".
-
-Hướng dẫn chi tiết: LAB_GUIDE.md § Bonus — CI/CD với GitHub Actions
+Các test có mark `docker` sẽ tự bỏ qua nếu máy bạn chưa cài/chưa bật Docker —
+bạn không bị mất điểm vì lý do đó, nhưng nên tự chạy `docker build` một lần.
 """
 
 from __future__ import annotations
 
 import re
+import subprocess
 
-import httpx
 import pytest
 import yaml
 
-WORKFLOW_DIR = ".github/workflows"
-BADGE_TIMEOUT = 20.0
+IMAGE_TAG = "day12-agent:cp2-test"
+MAX_IMAGE_SIZE_MB = 500
 
 
-@pytest.fixture(scope="module")
-def workflow_path(repo_root):
-    folder = repo_root / WORKFLOW_DIR
-    if not folder.exists():
-        pytest.fail(
-            f"chưa có thư mục {WORKFLOW_DIR}/ — phần bonus này yêu cầu bạn tự "
-            "viết một workflow GitHub Actions. Xem LAB_GUIDE.md § Bonus."
+def docker_available() -> bool:
+    """Docker daemon có đang chạy không? Không có thì bỏ qua các test build."""
+    try:
+        result = subprocess.run(
+            ["docker", "info"], capture_output=True, timeout=30, check=False
         )
-    files = sorted(folder.glob("*.yml")) + sorted(folder.glob("*.yaml"))
-    if not files:
-        pytest.fail(f"{WORKFLOW_DIR}/ rỗng — chưa có file workflow nào")
-    return files[0]
+        return result.returncode == 0
+    except (FileNotFoundError, subprocess.TimeoutExpired, OSError):
+        return False
 
 
 @pytest.fixture(scope="module")
-def workflow(workflow_path) -> dict:
-    data = yaml.safe_load(workflow_path.read_text(encoding="utf-8"))
-    assert isinstance(data, dict), f"{workflow_path.name} không phải YAML hợp lệ"
-    return data
+def dockerfile_text(lab_root) -> str:
+    """Nội dung Dockerfile, đã bỏ comment — chấm lệnh thật, không chấm chú thích."""
+    path = lab_root / "Dockerfile"
+    assert path.exists(), "Không tìm thấy Dockerfile ở gốc repo"
+    lines = [
+        line
+        for line in path.read_text(encoding="utf-8").splitlines()
+        if not line.lstrip().startswith("#")
+    ]
+    return "\n".join(lines)
 
 
 @pytest.fixture(scope="module")
-def workflow_text(workflow_path) -
+def compose(lab_root) -> dict:
+    path = lab_root / "docker-compose.yml"
+    assert path.exists(), "Không tìm thấy docker-compose.yml"
+    data = yaml.safe_load(path.read_text(encoding
 
 ### Tool call: execute
-{"command": "cat /app/app/config.py; echo =====; cat /app/app/main.py"}
+{"command": "cat /app/tests/test_cp4.py; echo \"=====BONUS=====\"; cat /app/tests/test_bonus_cicd.py"}
+
+### Tool result
+"""CHECKPOINT 4 — Scaling & Reliability: stateless, readiness, graceful shutdown.
+
+Chạy: pytest tests/test_cp4.py -v
+File cần sửa: app/store.py, app/lifecycle.py, app/main.py (/ready, /health, /ask)
+"""
+
+from __future__ import annotations
+
+import re
+import signal
+
+import pytest
+
+
+class TestConversationStore:
+    def test_luu_va_doc_lai_duoc(self, fake_redis):
+        from app.store import ConversationStore
+
+        store = ConversationStore(fake_redis)
+        store.append("u1", "user", "Xin chào")
+        store.append("u1", "assistant", "Chào bạn")
+
+        history = store.get_history("u1")
+        assert [turn["role"] for turn in history] == ["user", "assistant"]
+        assert history[0]["content"] == "Xin chào"
+
+    def test_chua_co_gi_thi_tra_list_rong(self, fake_redis):
+        from app.store import ConversationStore
+
+        assert ConversationStore(fake_redis).get_history("nguoi-la") == []
+
+    def test_moi_user_mot_lich_su_rieng(self, fake_redis):
+        from app.store import ConversationStore
+
+        store = ConversationStore(fake_redis)
+        store.append("u1", "user", "cua u1")
+        store.append("u2", "user", "cua u2")
+        assert len(store.get_history("u1")) == 1
+        assert store.get_history("u2")[0]["content"] == "cua u2"
+
+    def test_cat_bot_lich_su_qua_dai(self, fake_redis):
+        """Lịch sử không được phình vô hạn — prompt dài = tiền token nhiều."""
+        from app.store import ConversationStore, HISTORY_MAX_MESSAGES
+
+        store = Convers
+
+### Tool call: execute
+{"command": "cat /app/app/config.py; echo \"=====LOGGING=====\"; cat /app/app/logging_utils.py; echo \"=====MAIN=====\"; cat /app/app/main.py"}
 
 ### Tool result
 """CP1 — Cấu hình theo 12-Factor.
@@ -1026,7 +871,7 @@ class Settings(BaseSettings):
         env_file=".env
 
 ### Tool call: execute
-{"command": "cat /app/app/auth.py; echo =====; cat /app/app/rate_limiter.py; echo =====; cat /app/app/cost_guard.py; echo =====; cat /app/app/store.py; echo =====; cat /app/app/lifecycle.py; echo =====; cat /app/app/logging_utils.py; echo =====; cat /app/utils/mock_llm.py"}
+{"command": "cat /app/app/auth.py; echo \"=====RATE=====\"; cat /app/app/rate_limiter.py; echo \"=====COST=====\"; cat /app/app/cost_guard.py; echo \"=====STORE=====\"; cat /app/app/store.py; echo \"=====LIFECYCLE=====\"; cat /app/app/lifecycle.py"}
 
 ### Tool result
 """CP3 — Xác thực bằng API key.
@@ -1066,58 +911,198 @@ def verify_api_key(
     Gợi ý: dùng ``status.HTTP_401_UNAUTHORIZED`` cho dễ đọc.
     """
     raise NotImplementedError("TODO (CP3): cài đặt verify_api_key")
-=====
+=====RATE=====
 """CP3 — Rate limiting bằng thuật toán sliding window.
 
 Đếm số request trong 60 giây **gần nhất** (cửa sổ trượt), thay vì đếm theo
 phút đồng hồ. Đếm theo phút đồng hồ có lỗ hổng: 10 request lúc 10:00:59 và
-10 request lúc 10:01:01 =
+10 request lúc 1
 
 ### Tool call: execute
-{"command": "cat /app/docker-compose.yml; echo =====; cat /app/requirements.txt; echo ====; cat /app/.dockerignore; echo ====; ls -la /app/screenshots; echo ====; cat /app/nginx/nginx.conf | head -40"}
+{"command": "cat /app/Dockerfile; echo \"=====DOCKERIGNORE=====\"; cat /app/.dockerignore; echo \"=====COMPOSE=====\"; cat /app/docker-compose.yml; echo \"=====REQ=====\"; cat /app/requirements.txt; echo \"=====ENV=====\"; cat /app/.env.example"}
 
 ### Tool result
 # ═══════════════════════════════════════════════════════════════════
-# CP2 — Stack chạy ở máy bạn: agent + redis (+ nginx nếu làm phần cộng điểm)
+# CP2 — Containerization
 #
-# Service `redis` đã cho sẵn — chạy ngay từ Block 1 để có Redis mà code:
-#     docker compose up -d redis
+# Dưới đây là Dockerfile "chạy được nhưng chưa production": một stage,
+# chạy bằng user root, không có health check, base image nặng.
 #
-# NHIỆM VỤ: bổ sung service `agent`. Yêu cầu:
-#   [ ] build từ Dockerfile trong thư mục hiện tại
-#   [ ] map cổng ra ngoài (8000:8000)
-#   [ ] KHÔNG viết secret thẳng vào file này — dùng nội suy biến môi trường
-#       `${AGENT_API_KEY}` (docker compose tự đọc từ file .env cùng thư mục)
-#   [ ] REDIS_URL trỏ tới `redis://redis:6379/0` — trong compose, tên service
-#       chính là hostname
-#   [ ] depends_on: redis
-#   [ ] healthcheck gọi /health
+# NHIỆM VỤ: sửa file này thành bản production-ready. Yêu cầu:
+#   [ ] Multi-stage build: stage `builder` cài dependency, stage runtime
+#       chỉ copy kết quả sang → image nhỏ hơn, không mang theo compiler.
+#       Cú pháp: `FROM python:3.11-slim AS builder`
+#   [ ] Base image slim (hoặc alpine), không dùng `python:3.11` bản đầy đủ
+#   [ ] COPY requirements.txt và pip install TRƯỚC khi COPY source code
+#       (Docker cache theo layer: sửa 1 dòng code không phải cài lại thư viện)
+#   [ ] Tạo user thường và chuyển sang bằng lệnh `USER` — container chạy
+#       root nghĩa là ai thoát được khỏi app cũng thành root trên host
+#   [ ] Có `HEALTHCHECK` gọi vào endpoint /health
+#   [ ] Đọc cổng từ biến môi trường PORT (cloud tự gán cổng, không cố định 8000)
 #
-# MỞ RỘNG TÙY CHỌN: thêm service `nginx` làm load balancer
-# (không phải bonus chấm điểm riêng; nginx/nginx.conf đã có sẵn)
-#     docker compose up --scale agent=3
-#
-# Kiểm tra: pytest tests/test_cp2.py -v
+# Kiểm tra:  pytest tests/test_cp2.py -v
+# Build thử: docker build -t day12-agent:prod .
+#            docker images day12-agent:prod     # xem dung lượng
 # ═══════════════════════════════════════════════════════════════════
+FROM python:3.11-slim AS builder
+WORKDIR /build
+COPY requirements.txt .
+RUN pip install --no-cache-dir --prefix=/install -r requirements.txt
 
-  agent:
-    build: .
-    ports:
-      - "8000:8000"
-    environment:
-      PORT: "8000"
-      AGENT_API_KEY: ${AGENT_API_KEY}
-      REDIS_URL: redis://redis:6379/0
-    depends_on:
-      redis:
-        condition: service_healthy
-    healthcheck:
-      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8000/health').read()"]
-      interval: 30s
-      timeout: 5s
-      retries: 3=====
-# Runtime
-fastapi>=0.110
-uvicorn[standard]>=0.29
-pydantic>=2.6
-pydantic-settings>=2.
+FROM python:3.11-slim AS runtime
+WORKDIR /app
+COPY --from=builder /install /usr/local
+COPY . .
+RUN useradd --create-home --uid 10001 appus
+
+### Tool call: execute
+{"command": "cat /app/utils/mock_llm.py; echo \"=====GITIGNORE=====\"; cat /app/.gitignore 2>/dev/null; echo \"=====SCREENSHOTS=====\"; ls -la /app/screenshots; cat /app/screenshots/README.md"}
+
+### Tool result
+"""Mock LLM — CHO SẴN, KHÔNG CẦN SỬA.
+
+Trả lời tất định (cùng câu hỏi → cùng câu trả lời) nên không cần API key,
+không tốn tiền, và test luôn cho kết quả ổn định.
+
+Dùng:
+    from utils.mock_llm import ask_llm
+    result = ask_llm("Docker là gì?", history=[...])
+    result["answer"], result["tokens_in"], result["tokens_out"], result["cost_usd"]
+"""
+
+from __future__ import annotations
+
+import hashlib
+
+# Giá giả lập, tính theo 1.000 token (giống thang giá gpt-4o-mini)
+PRICE_INPUT_PER_1K = 0.00015
+PRICE_OUTPUT_PER_1K = 0.00060
+
+_TEMPLATES = [
+    "Theo mình hiểu, {q} liên quan tới cách hệ thống được đóng gói và vận hành. "
+    "Điểm mấu chốt là tách cấu hình ra khỏi code và giữ service ở trạng thái stateless.",
+    "Câu hỏi hay. {q} thường được giải quyết bằng cách chuẩn hóa môi trường chạy: "
+    "cùng một image chạy giống nhau ở laptop và trên cloud.",
+    "Ngắn gọn: {q} phụ thuộc vào ba yếu tố — cấu hình qua biến môi trường, "
+    "health check để orchestrator biết trạng thái, và giới hạn tài nguyên.",
+    "Với {q}, cách làm phổ biến trong production là đặt một lớp gateway phía trước "
+    "để lo authentication, rate limiting và bảo vệ chi phí.",
+]
+
+
+def _estimate_tokens(text: str) -> int:
+    """Ước lượng thô: ~4 ký tự / token, tối thiểu 1."""
+    return max(1, len(text) // 4)
+
+
+def ask_llm(question: str, history: list[dict] | None = None) -> dict:
+    """Giả lập một lượt gọi LLM.
+
+    Args:
+        question: câu hỏi của người dùng.
+        history: lịch sử hội thoại, list cá
+
+### Tool call: execute
+{"command": "cd /app && ls -la .venv/bin | head -30; .venv/bin/python -c \"import fastapi, fakeredis, yaml, httpx; print('ok')\""}
+
+### Tool result
+[stderr] ls: cannot access '.venv/bin': No such file or directory
+[stderr] /bin/sh: 1: .venv/bin/python: not found
+
+Exit code: 127
+[Command failed with exit code 127]
+
+### Tool call: execute
+{"command": "cd /app && ls -la .venv; python3 -c \"import fastapi, fakeredis, yaml, httpx, pytest; print('ok')\"; which python3 pytest docker"}
+
+### Tool result
+total 24
+drwxr-xr-x 5 root root 4096 Sep 28 07:30 .
+drwxr-xr-x 1 root root 4096 Sep 28 08:36 ..
+drwxr-xr-x 2 root root 4096 Sep 28 07:30 Include
+drwxr-xr-x 3 root root 4096 Sep 28 07:30 Lib
+drwxr-xr-x 2 root root 4096 Sep 28 07:32 Scripts
+-rwxr-xr-x 1 root root  374 Sep 28 07:30 pyvenv.cfg
+ok
+/usr/local/bin/python3
+/usr/local/bin/pytest
+
+Exit code: 1
+[Command failed with exit code 1]
+
+### Tool call: execute
+{"command": "cd /app && timeout 600 python3 -m pytest tests/ -q --tb=no -p no:cacheprovider 2>&1 | tail -30", "timeout": 700}
+
+### Tool result
+FAILED tests/test_cp4.py::TestConversationStore::test_cat_bot_lich_su_qua_dai
+FAILED tests/test_cp4.py::TestConversationStore::test_co_dat_han_su_dung - No...
+FAILED tests/test_cp4.py::TestConversationStore::test_ping_bao_dung_trang_thai
+FAILED tests/test_cp4.py::TestConversationStore::test_ping_khong_nem_loi_khi_redis_chet
+FAILED tests/test_cp4.py::TestStateless::test_state_khong_nam_trong_process
+FAILED tests/test_cp4.py::TestStateless::test_lich_su_duoc_dung_lai_giua_cac_request
+FAILED tests/test_cp4.py::TestReadiness::test_ready_tra_200_khi_redis_song - ...
+FAILED tests/test_cp4.py::TestReadiness::test_ready_tra_503_khi_redis_chet - ...
+FAILED tests/test_cp4.py::TestGracefulShutdown::test_ready_bao_503_khi_dang_tat
+FAILED tests/test_cp5.py::TestDeploymentDoc::test_da_dien_thong_tin_ca_nhan
+FAILED tests/test_cp5.py::TestDeploymentDoc::test_ghi_ro_platform - Assertion...
+FAILED tests/test_cp5.py::TestDeploymentDoc::test_liet_ke_bien_moi_truong - A...
+FAILED tests/test_cp5.py::TestDeploymentDoc::test_khong_lo_secret_trong_tai_lieu
+ERROR tests/test_bonus_cicd.py::TestTrigger::test_chay_khi_push_va_pull_request
+ERROR tests/test_bonus_cicd.py::TestJobTest::test_co_job_chay_pytest - Failed...
+ERROR tests/test_bonus_cicd.py::TestJobTest::test_khong_chay_test_can_deploy_trong_ci
+ERROR tests/test_bonus_cicd.py::TestJobTest::test_co_cai_dependency - Failed:...
+ERROR tests/test_bonus_cicd.py::TestJobBuild::test_co_buoc_build_docker_image
+ERROR tests/test_bonus_cicd.py::TestJobDeploy:
+
+### Tool call: execute
+{"command": "cd /app && timeout 600 python3 -m pytest tests/ -q --tb=no -p no:cacheprovider 2>&1 | head -60", "timeout": 700}
+
+### Tool result
+EEEEEEEEEEEEF...................F.FFFFFFssFFFFFFFFFFFFFFFFFFFFFFFFFFFFF. [ 75%]
+F.FFF.....FFFFFEEEEsssss                                                 [100%]
+=============================== warnings summary ===============================
+tests/test_cp1.py::TestHealthEndpoint::test_health_tra_ve_200
+  /usr/local/lib/python3.11/site-packages/fastapi/testclient.py:1: StarletteDeprecationWarning: Using `httpx` with `starlette.testclient` is deprecated; install `httpx2` instead.
+    from starlette.testclient import TestClient as TestClient  # noqa
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+=========================== short test summary info ============================
+FAILED tests/test_bonus_cicd.py::TestBadge::test_badge_bao_passing - Failed: ...
+FAILED tests/test_cp2.py::TestDockerignore::test_ton_tai_va_day_du - Assertio...
+FAILED tests/test_cp2.py::TestDockerCompose::test_co_service_agent_va_redis
+FAILED tests/test_cp2.py::TestDockerCompose::test_agent_build_tu_dockerfile
+FAILED tests/test_cp2.py::TestDockerCompose::test_agent_phu_thuoc_redis - Key...
+FAILED tests/test_cp2.py::TestDockerCompose::test_agent_tro_dung_toi_redis_service
+FAILED tests/test_cp2.py::TestDockerCompose::test_secret_khong_nam_trong_compose
+FAILED tests/test_cp2.py::TestDockerCompose::test_agent_co_healthcheck - KeyE...
+FAILED tests/test_cp3.py::TestAuthentication::test_khong_co_key_thi_401 - ass...
+FAILED tests/test_cp3.py::TestAuthentication::test_sai_key_thi_401 - asse
+
+### Tool call: execute
+{"command": "cd /app && timeout 600 python3 -m pytest tests/test_cp1.py tests/test_cp2.py -q --tb=line -p no:cacheprovider 2>&1 | head -40", "timeout": 700}
+
+### Tool result
+...................F.FFFFFFss                                            [100%]
+=================================== FAILURES ===================================
+E   AssertionError: .dockerignore thiếu mục '__pycache__'
+    assert '__pycache__' in '# TODO (CP2): file này quyết định thứ KHÔNG được copy vào image.\n# Bỏ sót .env = leak secret vào image. Bỏ sót .git = image phình to.\n# Bổ sung đủ các mục còn thiếu — xem tests/test_cp2.py để biết yêu cầu.\n\n.git\n.gitignore\n'
+/app/tests/test_cp2.py:139: AssertionError: .dockerignore thiếu mục '__pycache__'
+E   AssertionError: thiếu service `agent`
+    assert 'agent' in {}
+/app/tests/test_cp2.py:151: AssertionError: thiếu service `agent`
+E   KeyError: 'services'
+/app/tests/test_cp2.py:155: KeyError: 'services'
+E   KeyError: 'services'
+/app/tests/test_cp2.py:159: KeyError: 'services'
+E   KeyError: 'services'
+/app/tests/test_cp2.py:166: KeyError: 'services'
+E   KeyError: 'services'
+/app/tests/test_cp2.py:175: KeyError: 'services'
+E   KeyError: 'services'
+/app/tests/test_cp2.py:183: KeyError: 'services'
+=============================== warnings summary ===============================
+tests/test_cp1.py::TestHealthEndpoint::test_health_tra_ve_200
+  /usr/local/lib/python3.11/site-packages/fastapi/testclient.py:1: StarletteDeprecationWarning: Using `httpx` with `starlette.testclient` is deprecated; install `httpx2` instead.
+    from starlette.testclient import TestClient as TestClient  # noqa
+
+-- Docs: https://docs.pytest.org/en/stable/
