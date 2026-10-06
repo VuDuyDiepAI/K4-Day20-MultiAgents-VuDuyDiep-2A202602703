@@ -46,7 +46,11 @@ Chưa tạo tag freeze; chưa chạy hoặc phân tích task eval. Không có sk
 
 Đã chuyển `.env` sang `ollama:qwen3-lab:8b`, temperature=0.6. Ollama 0.35.1 chạy trên Windows; model Qwen3 8B tải thành công và alias được tạo từ `Modelfile.lab` (context 16384, num_predict 4096). Docker gọi model qua `http://host.docker.internal:11434`; `Run-Lab.ps1` đặt biến này cho từng lệnh. Smoke test trả về `OK`; đủ 29 test đạt sau khi cài langchain-ollama 1.1.0 và ollama SDK 0.6.3. GPU/CPU ghi nhận 80%/20% với bộ nhớ model 7.8 GB. Chi tiết tái lập: `LOCAL_MODEL.md`.
 
-Baseline `data-learn` bằng model local đã được khởi chạy. Đã quan sát agent sửa `workspace/sales.csv` trong sandbox (3646 xuống 3543 byte), xác nhận đường gọi công cụ hoạt động. Chưa có run.json tại checkpoint này: chưa ghi nhận điểm, lỗi cuối, token hoặc số tool call. Các thống kê Gemini ở trên là lịch sử hạ tầng, không phải kết quả của cấu hình local. Model thinking mất nhiều thời gian mỗi lượt; không khởi chạy trùng task khi tiến trình hiện tại còn chạy.
+Baseline `data-learn` local đã hoàn tất: 0/8, error=null, 867.6 giây, 43110 token, 4 tool call. Agent sửa dữ liệu nguồn nhưng không tạo answer.json hoặc clean.csv; final_message trống. Đây là lỗi hoàn thành nhiệm vụ, không phải quota API.
+
+Lượt `code-learn` đầu tiên: 0/10, 286.4 giây, 22096 token, 5 tool call. Đã phát hiện check tests_not_modified thất bại do checkout Windows dùng CRLF: SHA-256 thực tế efb5e7650d4f03356e8353d209fbcfe81505ce2fd648bd558d5ada6e8b92ff19, trong khi byte LF gốc từ Git khớp hash grader 79e05f4cc2e62a4f606d210b0b08a2cc21777245bc2f6ad244a126e9a2aee00d. Lưu riêng tại results-infrastructure/windows-crlf/baseline/code-learn, không dùng cho curator. Đã khôi phục đúng byte gốc của các test được grader fingerprint và thêm .gitattributes để giữ LF cho tasks. Không sửa nội dung mã/test PROVIDED. Phải chạy lại baseline code-learn trước curator.
+
+Docker từng dừng giữa chuỗi task; đã khởi động lại. Tiếp tục logs-learn baseline và ba task subagents learn, rồi chạy lại code-learn baseline. Các thống kê Gemini ở trên là lịch sử hạ tầng, không phải kết quả của cấu hình local. Model thinking mất nhiều thời gian mỗi lượt; không khởi chạy trùng task khi tiến trình hiện tại còn chạy.
 
 ## Tiếp tục với runtime hiện tại
 

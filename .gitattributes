@@ -1,0 +1,2 @@
+# Graders compare original test bytes against canonical LF hashes.
+tasks/** text eol=lf
