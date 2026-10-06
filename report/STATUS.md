@@ -7,7 +7,7 @@
 - Triển khai run_task: sandbox tạm, hash skill, timestamp, token, tool/subagent/skill đọc, grading, trace và JSON.
 - Triển khai curate_skills: chỉ lấy dữ liệu learn không có lỗi hạ tầng, kiểm tra skill trước khi ghi, không gọi model khi không có check thất bại.
 - Dùng AIMessage.text để đọc văn bản từ content block của Gemini, giữ nguyên message trong agent.
-- 29 test đạt trên Linux trước thí nghiệm; sau cải tiến giữ trace bằng stream, sáu test runner tiếp tục đạt.
+- 29 test đạt trên Linux trước thí nghiệm; sau cải tiến giữ trace bằng stream, toàn bộ 29 test tiếp tục đạt (14,13 giây).
 - Smoke test Gemini 3.5 Flash trên Linux trả OK. Cấu hình: google_genai:gemini-3.5-flash, temperature=1, recursion-limit=60.
 - Tạo REPORT.md, điền cấu hình và câu hỏi tour; lưu tour.txt và environment-linux.txt.
 
@@ -60,6 +60,6 @@ Image Python 3.12 trong Dockerfile gốc không tải được layer do lỗi m�
 Đã dùng image Python 3.11.16 có sẵn day12-agent:prod trong container riêng, cài dependency lab bằng wheel Linux được pip kiểm tra hash. Không chạy entrypoint ứng dụng cũ.
 Git được cài trong container để verify_freeze chạy trên cùng hệ Linux và hash đường dẫn nhất quán.
 .lab-wheels/, .venv-wsl/, .uv-cache/ được git bỏ qua.
-WSL Ubuntu đã được cài python3.14-venv và môi trường riêng .venv-wsl; chưa dùng WSL chạy task API, không trộn với kết quả Docker.
+WSL Ubuntu đã được cài python3.14-venv và tạo .venv-wsl; cài dependency trong WSL đã được dừng vì Docker sẵn sàng. Không coi .venv-wsl là runtime hoàn chỉnh, chưa dùng WSL chạy task API và không trộn với kết quả Docker.
 Tái lập runtime mới khi mạng ổn định bằng Dockerfile gốc và cài git trong container, hoặc WSL theo WORKFLOW.md.
 Phiên bản runtime thực tế: environment-linux.txt.
