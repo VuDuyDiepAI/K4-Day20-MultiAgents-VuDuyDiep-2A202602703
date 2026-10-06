@@ -13,6 +13,17 @@
 
 ## Lỗi hạ tầng và bằng chứng
 
+### Tiếp tục với key mới
+
+- Lần đầu với key mới: 503 UNAVAILABLE do model quá tải; 181,3 giây, 18.766 token, năm lượt công cụ. Trace xác nhận đọc README, khảo sát file và đọc CSV nhưng chưa tạo answer.json. Lưu tại results-infrastructure/retry-503/baseline/data-learn/.
+- Thử lại một lần: 429 RESOURCE_EXHAUSTED, giới hạn 20 request/ngày/project/model; retryDelay 34.536 giây, khoảng 9 giờ 36 phút từ lúc báo lỗi. 93,3 giây, 3.122 token, một lượt công cụ. Lưu tại results-infrastructure/new-key-429/baseline/data-learn/.
+- Không có baseline hợp lệ sau hai lần này. Không chạy task khác, curator hoặc eval khi quota đã hết.
+- Tổng ba lần baseline lỗi hạ tầng: 198.547 token ghi nhận, 438,1 giây; không đưa vào bảng điểm chính thức.
+- [Google xác nhận quota tính theo project, không theo API key](https://ai.google.dev/gemini-api/docs/rate-limits). Đổi key trong cùng project không đặt lại quota. Cần project/provider có đủ quota hoặc chờ đặt lại; kiểm tra hạn mức thực tế ở Google AI Studio.
+- Báo cáo đã bổ sung thiết kế subagent, hạn chế và tài liệu phương pháp; giả thuyết và kết quả vẫn chờ dữ liệu thật.
+
+### Lần lỗi trước khi đổi key
+
 Baseline data-learn chạy 163,5 giây, ghi nhận 176.659 token rồi gặp GoogleRateLimitError / 429 RESOURCE_EXHAUSTED.
 API báo giới hạn 20 request/ngày/project/model của generate_content_free_tier_requests và retryDelay 66.172 giây, khoảng 18 giờ 23 phút từ lúc báo lỗi.
 Không lấy điểm 0/8 này làm kết quả thí nghiệm và không dùng lỗi làm feedback cho curator.

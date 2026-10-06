@@ -6,11 +6,11 @@
 
 | Họ tên | Mã sinh viên | Phần đóng góp |
 |---|---|---|
-| | | |
+| Vu Duy Diep | 2A202602703 | Triển khai và kiểm tra harness, chạy thí nghiệm, phân tích và viết báo cáo với hỗ trợ Codex. Thông tin tên/MSSV lấy từ tên kho bài lab. |
 
 - Mô hình: `google_genai:gemini-3.5-flash`; `LAB_TEMPERATURE=1`; `recursion_limit=60`, dùng nhất quán cho ba điều kiện.
 - Deep Agents 0.7.21, langchain-google-genai 4.4.0; Python 3.11.16 trên Linux trong container Docker riêng `lab-workflow-linux`. Phiên bản thư viện đầy đủ: `report/environment-linux.txt`. Cài dependency offline bằng wheel Linux sau lỗi tải mạng. Toàn bộ 29 test đạt trên Linux trước khi chạy task thật.
-- Số lần chạy: một baseline data-learn gặp lỗi quota, lưu riêng trong results-infrastructure, không tính là kết quả hợp lệ; chưa có run chính thức hợp lệ. Chi tiết: report/STATUS.md.
+- Số lần chạy: ba baseline data-learn lỗi hạ tầng (429, 503, 429), lưu riêng trong results-infrastructure, không tính là kết quả hợp lệ; chưa có run chính thức hợp lệ. Tổng token ghi nhận của các lần lỗi: 198.547; thời gian: 438,1 giây. Chi tiết: report/STATUS.md.
 - Commit của tag `freeze`: chưa tạo; chờ dữ liệu học hợp lệ và giả thuyết.
 
 ## 2. Giả thuyết (commit TRƯỚC tag `freeze`, Phần 4.0)
@@ -39,7 +39,7 @@ Nhận xét: nhóm lỗi nào chiếm đa số? Skill có thể phòng ngừa nh
 
 ## 5. Điều kiện `subagents` (Phần 2.3)
 
-- Các subagent đã định nghĩa (tên, vai trò, lý do thiết kế):
+- Các subagent đã định nghĩa: `explorer` đọc đặc tả, khảo sát code/dữ liệu/log và đề xuất kế hoạch dựa trên bằng chứng; `reviewer` chạy kiểm tra độc lập trên đầu ra và báo lỗi cụ thể. Cả hai được yêu cầu không sửa tệp. Tách điều tra và kiểm chứng để tác tử chính giữ trách nhiệm thực hiện, đồng thời tránh hai tác tử sửa cùng tệp. Mode single vẫn có general-purpose mặc định; mode subagents bổ sung hai vai trò này.
 - `subagent_calls` ở từng tác vụ và nhận xét (kể cả trường hợp bằng 0):
 - Thông tin thiếu hoặc thừa khi giao việc (nếu có giao việc):
 - Ảnh hưởng đến token và thời gian:
@@ -75,9 +75,10 @@ Nhận xét: nhóm lỗi nào chiếm đa số? Skill có thể phòng ngừa nh
 
 > Nêu ít nhất 3 hạn chế và ảnh hưởng của từng hạn chế đến kết luận (ví dụ: chỉ 3 tác vụ mỗi vai trò, mỗi cấu hình chạy một lần, nhiễu của mô hình, tác vụ do giảng viên thiết kế sẵn quy ước, chỉ một mô hình).
 
-1.
-2.
-3.
+1. Chỉ có ba tác vụ cho mỗi vai trò learn/eval và cùng ba họ do giảng viên thiết kế; kết quả không đại diện cho mọi tác vụ agent thực tế.
+2. Mỗi cấu hình chính thức chỉ chạy một lần và model có temperature=1; chênh lệch điểm có thể do nhiễu. So hai lần skills-auto trên tập học chỉ ước lượng nhiễu trên tập học, không tạo khoảng tin cậy cho tập đánh giá.
+3. Chỉ dùng một model và một harness; kết luận không thể tự động chuyển sang provider hoặc kiến trúc khác. Token tính cả subagent nhưng trace/tool_calls chỉ thuộc luồng chính, hạn chế phân tích thao tác nội bộ subagent.
+4. Lỗi quota và quá tải API có thể làm task dừng trước khi hoàn tất. Các lần có lỗi hạ tầng được lưu riêng và không dùng làm bằng chứng agent kém hoặc feedback cho curator; ngân sách tổng vẫn cần tính cả chúng.
 
 ## 10. Kết luận
 
@@ -88,3 +89,11 @@ Nhận xét: nhóm lỗi nào chiếm đa số? Skill có thể phòng ngừa nh
 - Lệnh đã chạy (theo thứ tự):
 - Thử thách mở rộng (nếu có): hướng chọn, kết quả, nhận xét.
 - Ghi chú khác:
+
+Sau khi thay key, một lần chạy gặp 503 do quá tải và lần thử lại gặp quota 20 request/ngày/project/model. [Quota Gemini áp dụng theo project, không theo key](https://ai.google.dev/gemini-api/docs/rate-limits); việc đổi key không bảo đảm có thêm quota. Không dùng điểm 0/8 của các lần này làm kết quả hành vi của agent hoặc làm feedback cho curator.
+
+### Tài liệu tham khảo và cơ sở phương pháp
+
+- README.md, GUIDE.md, RUBRIC.md và guides/pseudocode/01–05 trong kho: định nghĩa điều kiện, metric, protocol freeze và yêu cầu skill tự sinh.
+- [SkillsBench, Li và cộng sự, arXiv:2602.12670v4](https://arxiv.org/abs/2602.12670v4): đánh giá cặp giữa không skill và skill biên soạn cho thấy lợi ích phụ thuộc model/harness; skill tập trung có thể tốt hơn bộ lớn. Kết quả này không bảo đảm skill tự sinh của lab có lợi.
+- [SkillEvolBench, trang nhóm nghiên cứu](https://skillevolbench.github.io/): tách học trải nghiệm và triển khai sau freeze; khả năng cải thiện tại chỗ không đồng nghĩa chuyển giao ổn định khi ngữ cảnh thay đổi. Đây là căn cứ để tách learn/eval và kiểm tra quá khớp.
